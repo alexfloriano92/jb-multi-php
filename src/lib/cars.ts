@@ -1,5 +1,5 @@
-import { supabase } from "@/integrations/supabase/client";
 import { queryOptions } from "@tanstack/react-query";
+import { api } from "./api";
 
 export type Car = {
   id: string;
@@ -22,14 +22,41 @@ export type Car = {
   updated_at: string;
 };
 
+function normalize(c: any): Car {
+  return {
+    ...c,
+    price: c.price !== null && c.price !== undefined ? Number(c.price) : null,
+    year:  Number(c.year) || 0,
+    km:    Number(c.km)   || 0,
+    sort_order: Number(c.sort_order) || 0,
+    sold:     !!c.sold,
+    featured: !!c.featured,
+    images: Array.isArray(c.images) ? c.images : (c.images ? JSON.parse(c.images) : []),
+  };
+}
+
 export async function fetchCars(): Promise<Car[]> {
-  const { data, error } = await supabase
-    .from("cars")
-    .select("*")
-    .order("sort_order", { ascending: true })
-    .order("created_at", { ascending: false });
-  if (error) throw error;
-  return (data ?? []) as Car[];
+  const data = await api<any[]>("/cars", { auth: false });
+  return (data ?? []).map(normalize);
+}
+
+export async function createCar(payload: Partial<Car>): Promise<Car> {
+  const c = await api<any>("/cars", { method: "POST", body: payload });
+  return normalize(c);
+}
+export async function updateCar(id: string, payload: Partial<Car>): Promise<Car> {
+  const c = await api<any>(`/cars/${id}`, { method: "PUT", body: payload });
+  return normalize(c);
+}
+export async function deleteCar(id: string): Promise<void> {
+  await api(`/cars/${id}`, { method: "DELETE" });
+}
+
+export async function uploadCarImage(file: File): Promise<string> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const r = await api<{ url: string }>("/uploads/car", { method: "POST", body: fd, raw: true });
+  return r.url;
 }
 
 export const carsQueryOptions = queryOptions({
@@ -40,8 +67,8 @@ export const carsQueryOptions = queryOptions({
 export function categoryLabel(c: string): string {
   if (c.includes("novo") && !c.includes("seminovo")) return "0KM";
   if (c.includes("seminovo")) return "Seminovo";
-  if (c.includes("pickup")) return "Pickup";
-  if (c.includes("suv")) return "SUV";
+  if (c.includes("pickup"))   return "Pickup";
+  if (c.includes("suv"))      return "SUV";
   return c;
 }
 

@@ -1,8 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { carsQueryOptions, type Car } from "@/lib/cars";
+import { me, logout as apiLogout } from "@/lib/api";
+import {
+  carsQueryOptions,
+  createCar,
+  updateCar,
+  deleteCar,
+  uploadCarImage,
+  type Car,
+} from "@/lib/cars";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -37,8 +44,6 @@ const EMPTY: FormState = {
   sort_order: 0,
 };
 
-const TEN_YEARS = 60 * 60 * 24 * 365 * 10;
-
 function AdminPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -56,19 +61,10 @@ function AdminPage() {
 
   useEffect(() => {
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) {
-        navigate({ to: "/auth" });
-        return;
-      }
-      setUserEmail(u.user.email ?? null);
-      const { data: role } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", u.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-      setIsAdmin(!!role);
+      const u = await me();
+      if (!u) { navigate({ to: "/auth" }); return; }
+      setUserEmail(u.email);
+      setIsAdmin(u.role === "admin");
       setAuthChecked(true);
     })();
   }, [navigate]);
@@ -76,7 +72,7 @@ function AdminPage() {
   const { data: cars = [], refetch } = useQuery({ ...carsQueryOptions, enabled: authChecked });
 
   async function signOut() {
-    await supabase.auth.signOut();
+    await apiLogout();
     navigate({ to: "/auth" });
   }
 
@@ -98,16 +94,8 @@ function AdminPage() {
     setErr(null);
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${crypto.randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("car-images").upload(path, file, {
-        contentType: file.type,
-        cacheControl: "31536000",
-      });
-      if (upErr) throw upErr;
-      const { data, error: signErr } = await supabase.storage.from("car-images").createSignedUrl(path, TEN_YEARS);
-      if (signErr) throw signErr;
-      setForm((f) => ({ ...f, image_url: data.signedUrl }));
+      const url = await uploadCarImage(file);
+      setForm((f) => ({ ...f, image_url: url }));
     } catch (e: any) {
       setErr(e.message || "Falha ao enviar imagem");
     } finally {
@@ -116,16 +104,7 @@ function AdminPage() {
   }
 
   async function uploadOne(file: File): Promise<string> {
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const path = `${crypto.randomUUID()}.${ext}`;
-    const { error: upErr } = await supabase.storage.from("car-images").upload(path, file, {
-      contentType: file.type,
-      cacheControl: "31536000",
-    });
-    if (upErr) throw upErr;
-    const { data, error: signErr } = await supabase.storage.from("car-images").createSignedUrl(path, TEN_YEARS);
-    if (signErr) throw signErr;
-    return data.signedUrl;
+    return uploadCarImage(file);
   }
 
   async function handleGalleryUpload(files: FileList) {
@@ -172,11 +151,9 @@ function AdminPage() {
         sort_order: Number(form.sort_order) || 0,
       };
       if (editing) {
-        const { error } = await supabase.from("cars").update(payload).eq("id", editing);
-        if (error) throw error;
+        await updateCar(editing, payload);
       } else {
-        const { error } = await supabase.from("cars").insert(payload);
-        if (error) throw error;
+        await createCar(payload);
       }
       resetForm();
       await refetch();
@@ -190,18 +167,20 @@ function AdminPage() {
 
   async function remove(id: string) {
     if (!confirm("Excluir este veículo?")) return;
-    const { error } = await supabase.from("cars").delete().eq("id", id);
-    if (error) return alert(error.message);
-    await refetch();
-    qc.invalidateQueries({ queryKey: ["cars"] });
+    try {
+      await deleteCar(id);
+      await refetch();
+      qc.invalidateQueries({ queryKey: ["cars"] });
+    } catch (e: any) { alert(e.message); }
   }
 
   async function toggle(id: string, field: "sold" | "featured", value: boolean) {
     const patch = field === "sold" ? { sold: value } : { featured: value };
-    const { error } = await supabase.from("cars").update(patch).eq("id", id);
-    if (error) return alert(error.message);
-    await refetch();
-    qc.invalidateQueries({ queryKey: ["cars"] });
+    try {
+      await updateCar(id, patch);
+      await refetch();
+      qc.invalidateQueries({ queryKey: ["cars"] });
+    } catch (e: any) { alert(e.message); }
   }
 
   if (!authChecked) {

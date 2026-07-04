@@ -36,8 +36,14 @@ function normalize(c: any): Car {
 }
 
 export async function fetchCars(): Promise<Car[]> {
-  const data = await api<any[]>("/cars", { auth: false });
-  return (data ?? []).map(normalize);
+  try {
+    const data = await api<any[]>("/cars", { auth: false });
+    return (data ?? []).map(normalize);
+  } catch (e) {
+    // Backend PHP ainda não configurado / offline — não derruba o SSR.
+    if (typeof console !== "undefined") console.warn("[cars] API indisponível:", (e as Error).message);
+    return [];
+  }
 }
 
 export async function createCar(payload: Partial<Car>): Promise<Car> {

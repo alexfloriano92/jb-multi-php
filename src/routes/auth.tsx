@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { login, me } from "@/lib/api";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -23,9 +23,7 @@ function AuthPage() {
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/admin" });
-    });
+    me().then((u) => { if (u) navigate({ to: "/admin" }); });
   }, [navigate]);
 
   async function onSubmit(e: React.FormEvent) {
@@ -33,8 +31,7 @@ function AuthPage() {
     setErr(null);
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      await login(email, password);
       navigate({ to: "/admin" });
     } catch (e: any) {
       setErr(e.message || "Erro ao autenticar");

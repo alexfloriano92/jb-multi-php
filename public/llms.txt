@@ -1,0 +1,9 @@
+# JB Multimarcas
+
+> Concessionária de veículos novos e seminovos em Cachoeira de Minas - MG. Compra, venda, troca e financiamento com procedência garantida.
+
+A JB Multimarcas é uma revenda de automóveis localizada em Cachoeira de Minas (MG), com foco em atendimento próximo, catálogo variado de 0KM, seminovos, pickups e SUVs, e opções de financiamento e troca.
+
+## Pages
+
+- [Página inicial e catálogo de veículos](/): catálogo com filtros por categoria (0KM, seminovo, pickup, SUV), busca, contato via WhatsApp e informações da loja.

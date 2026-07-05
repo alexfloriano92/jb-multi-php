@@ -47,9 +47,9 @@ Tudo foi feito assumindo que você está no **Windows** com o projeto na pasta
 
 1. **Criar banco**
    - Nome: `jbmulti` → clicar **Criar Banco de Dados**
-   - O cPanel prefixa com seu usuário; ficará algo como **`seuuser_jbmulti`**. Anote.
+   - O cPanel prefixa com seu usuário; ficará algo como **`jbmultimarcaas2_jbmulti`**. Anote.
 2. **Criar usuário MySQL** (mesma tela, mais abaixo)
-   - Usuário: `jbadmin` → prefixado: **`seuuser_jbadmin`**
+   - Usuário: `jbadmin` → prefixado: **`jbmultimarcaas2_jbadmin`**
    - Senha: `Vodin4s@` → **Criar Usuário**
 3. **Adicionar usuário ao banco**
    - Selecione o usuário e o banco → **Adicionar**
@@ -63,7 +63,7 @@ Tudo foi feito assumindo que você está no **Windows** com o projeto na pasta
 ## 📁 PARTE 2 — Estrutura de pastas no servidor
 
 ```
-/home/seuuser/
+/home/jbmultimarcaas2/
 ├── laravel/              ← código do Laravel (FORA do público)
 │   ├── app/  bootstrap/  config/  database/  routes/  storage/  vendor/
 │   ├── .env
@@ -110,8 +110,8 @@ APP_URL=https://jbmultimarcaas.com.br
 DB_CONNECTION=mysql
 DB_HOST=localhost
 DB_PORT=3306
-DB_DATABASE=jbmulti          # ou seuuser_jbmulti se o cPanel prefixar
-DB_USERNAME=jbadmin          # ou seuuser_jbadmin
+DB_DATABASE=jbmulti          # ou jbmultimarcaas2_jbmulti se o cPanel prefixar
+DB_USERNAME=jbadmin          # ou jbmultimarcaas2_jbadmin
 DB_PASSWORD=Vodin4s@
 
 JWT_SECRET=
@@ -192,7 +192,7 @@ require __DIR__.'/../laravel/vendor/autoload.php';
 - Usuário / Senha: (do FTP)
 - Conectar
 
-### 6.1. Enviar o Laravel para `/home/seuuser/laravel/`
+### 6.1. Enviar o Laravel para `/home/jbmultimarcaas2/laravel/`
 
 No painel direito (servidor), suba um nível acima de `public_html`, crie a pasta
 `laravel/` e envie **todo o conteúdo de `C:\Projetos\jb-multimarcas\backend\`
@@ -217,7 +217,7 @@ Dentro de `public_html/`:
 No CMD do Windows:
 
 ```cmd
-ssh seuuser@jbmultimarcaas.com.br
+ssh jbmultimarcaas2@jbmultimarcaas.com.br
 cd laravel
 php artisan migrate --seed --force
 ```
@@ -226,7 +226,7 @@ php artisan migrate --seed --force
 
 **Caminho:** `cPanel → Bancos de Dados → phpMyAdmin`
 
-1. Selecione o banco `seuuser_jbmulti` na esquerda
+1. Selecione o banco `jbmultimarcaas2_jbmulti` na esquerda
 2. Aba **Importar** → escolha o arquivo
    `C:\Projetos\jb-multimarcas\backend\database\schema.sql` → **Executar**
 3. Isso cria as tabelas E o usuário admin (`admin@jbmultimarcas.com.br` / `admin123`)
@@ -268,7 +268,7 @@ veículo com foto, e confira em `/`.
 | **CORS bloqueado no console** | Domínio errado em `CORS_ALLOWED_ORIGINS` | Editar `.env` e rodar `php artisan config:cache` |
 | **Login "Failed to fetch"** | `VITE_API_URL` errado no build | Ajustar `.env.production`, `npm run build` e reenviar `dist/` |
 | **"No application encryption key"** | Faltou rodar `php artisan key:generate` | Rodar localmente e reenviar `.env` |
-| **Erro de conexão MySQL** | Nome do banco/usuário sem prefixo | Trocar para `seuuser_jbmulti` / `seuuser_jbadmin` |
+| **Erro de conexão MySQL** | Nome do banco/usuário sem prefixo | Trocar para `jbmultimarcaas2_jbmulti` / `jbmultimarcaas2_jbadmin` |
 
 ---
 

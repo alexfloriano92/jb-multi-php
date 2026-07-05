@@ -13,6 +13,9 @@ Tudo foi feito assumindo que você está no **Windows** com o projeto na pasta
 | Item | Valor |
 |---|---|
 | Domínio | `jbmultimarcaas.com.br` |
+| Usuário cPanel/FTP | `jbmultimarcaas2` |
+| Host FTP | `ftp.jbmultimarcaas.com.br` (porta 21) |
+| Pasta raiz no servidor | `/home/jbmultimarcaas2/` |
 | Banco (nome) | `jbmulti` |
 | Banco (usuário) | `jbadmin` |
 | Banco (senha) | `Vodin4s@` |

@@ -1,10 +1,9 @@
 # 🚀 Deploy Completo — JB Multimarcas na Locaweb
 
-Guia passo a passo, do zero, para publicar **frontend (React) + backend (Laravel + MySQL)**
+Guia passo a passo para publicar **frontend (React) + backend (CodeIgniter 4 + MySQL)**
 na Hospedagem **Locaweb Go / cPanel** usando o domínio **`jbmultimarcaas.com.br`**.
 
-Tudo foi feito assumindo que você está no **Windows** com o projeto na pasta
-`C:\Projetos\jb-multimarcas\` (ajuste se for outra).
+Tudo assume que você está no **Windows** com o projeto em `C:\Projetos\jb-multimarcas\`.
 
 ---
 
@@ -16,8 +15,8 @@ Tudo foi feito assumindo que você está no **Windows** com o projeto na pasta
 | Usuário cPanel/FTP | `jbmultimarcaas2` |
 | Host FTP | `ftp.jbmultimarcaas.com.br` (porta 21) |
 | Pasta raiz no servidor | `/home/jbmultimarcaas2/` |
-| Banco (nome) | `jbmulti` |
-| Banco (usuário) | `jbadmin` |
+| Banco (nome) | `jbmulti` → `jbmultimarcaas2_jbmulti` |
+| Banco (usuário) | `jbadmin` → `jbmultimarcaas2_jbadmin` |
 | Banco (senha) | `Vodin4s@` |
 | Banco (host) | `localhost` |
 | Admin do site | `admin@jbmultimarcas.com.br` / `admin123` |
@@ -26,230 +25,157 @@ Tudo foi feito assumindo que você está no **Windows** com o projeto na pasta
 
 ---
 
-## 🧰 PARTE 0 — Instalar ferramentas no Windows (uma vez)
+## 🧰 PARTE 0 — Ferramentas no Windows (uma vez)
 
-1. **Node.js 20+** → https://nodejs.org (instalador LTS, clique *Next* em tudo).
-   - Testar no CMD: `node -v` e `npm -v`
-2. **PHP 8.2+** → https://windows.php.net/download/ (versão *Thread Safe x64*).
-   - Extraia em `C:\php` e adicione ao **PATH**:
-     `Painel → Sistema → Configurações avançadas → Variáveis de Ambiente → Path → Editar → Novo → C:\php`
-   - Testar: `php -v`
-3. **Composer** → https://getcomposer.org/Composer-Setup.exe (aponte para `C:\php\php.exe`).
-   - Testar: `composer -V`
-4. **FileZilla** (FTP) → https://filezilla-project.org/
-5. **Credenciais da Locaweb** em mãos:
-   - Login do **cPanel** (`https://cpanel.jbmultimarcaas.com.br` normalmente)
-   - FTP: host, usuário, senha
-   - (Opcional) SSH: host, usuário, senha
+1. **Node.js 20+** → https://nodejs.org — testar: `node -v`
+2. **PHP 8.1+** → https://windows.php.net/download/ (Thread Safe x64). Extraia em `C:\php`, adicione ao PATH. Testar: `php -v`
+3. **Composer** → https://getcomposer.org/Composer-Setup.exe (aponte para `C:\php\php.exe`)
+4. **FileZilla** → https://filezilla-project.org/
 
 ---
 
 ## 🗄️ PARTE 1 — Criar o banco de dados no cPanel
 
-**Caminho:** `cPanel → Bancos de Dados → Bancos de dados MySQL®`
+`cPanel → Bancos de Dados → Bancos de dados MySQL®`
 
-1. **Criar banco**
-   - Nome: `jbmulti` → clicar **Criar Banco de Dados**
-   - O cPanel prefixa com seu usuário; ficará algo como **`jbmultimarcaas2_jbmulti`**. Anote.
-2. **Criar usuário MySQL** (mesma tela, mais abaixo)
-   - Usuário: `jbadmin` → prefixado: **`jbmultimarcaas2_jbadmin`**
-   - Senha: `Vodin4s@` → **Criar Usuário**
-3. **Adicionar usuário ao banco**
-   - Selecione o usuário e o banco → **Adicionar**
-   - Marque **ALL PRIVILEGES** → **Fazer Alterações**
-
-> 📝 Anote os nomes **com prefixo** — é isso que vai no `.env`.
-> Se o cPanel da sua conta **não usa prefixo**, use `jbmulti` / `jbadmin` puros.
+1. **Criar banco** → nome `jbmulti` (fica **`jbmultimarcaas2_jbmulti`**)
+2. **Criar usuário** → `jbadmin` (fica **`jbmultimarcaas2_jbadmin`**), senha `Vodin4s@`
+3. **Adicionar usuário ao banco** → marcar **ALL PRIVILEGES**
 
 ---
 
-## 📁 PARTE 2 — Estrutura de pastas no servidor
+## 📁 PARTE 2 — Estrutura no servidor
 
 ```
 /home/jbmultimarcaas2/
-├── laravel/              ← código do Laravel (FORA do público)
-│   ├── app/  bootstrap/  config/  database/  routes/  storage/  vendor/
+├── ci/                   ← CodeIgniter (FORA do público)
+│   ├── app/  system/  vendor/  writable/
 │   ├── .env
-│   └── artisan
+│   └── spark
 └── public_html/          ← o que o navegador enxerga
     ├── index.html        ← React (SPA)
-    ├── index.php         ← Laravel bootstrap adaptado
-    ├── .htaccess         ← roteia /api → Laravel, resto → React
     ├── assets/           ← JS/CSS do React
-    └── uploads/cars/     ← fotos dos veículos
+    ├── uploads/cars/     ← fotos dos veículos
+    └── api/              ← bridge do CodeIgniter
+        ├── index.php     ← copiado de ci/public/index.php e adaptado
+        └── .htaccess     ← reescrita para index.php
 ```
 
 ---
 
-## ⚙️ PARTE 3 — Preparar o backend (Laravel) no Windows
-
-Abra o **CMD** na pasta do projeto:
-
-```cmd
-cd C:\Projetos\jb-multimarcas\backend
-```
-
-### 3.1. Instalar dependências de produção
-
-```cmd
-composer install --optimize-autoloader --no-dev
-```
-
-### 3.2. Criar o arquivo `.env` de produção
-
-```cmd
-copy .env.example .env
-```
-
-Abra `backend\.env` no Bloco de Notas e confirme:
-
-```env
-APP_NAME="JB Multimarcas API"
-APP_ENV=production
-APP_KEY=
-APP_DEBUG=false
-APP_URL=https://jbmultimarcaas.com.br
-
-DB_CONNECTION=mysql
-DB_HOST=localhost
-DB_PORT=3306
-DB_DATABASE=jbmulti          # ou jbmultimarcaas2_jbmulti se o cPanel prefixar
-DB_USERNAME=jbadmin          # ou jbmultimarcaas2_jbadmin
-DB_PASSWORD=Vodin4s@
-
-JWT_SECRET=
-JWT_TTL=1440
-
-CORS_ALLOWED_ORIGINS=https://jbmultimarcaas.com.br,https://www.jbmultimarcaas.com.br
-
-ADMIN_EMAIL=admin@jbmultimarcas.com.br
-ADMIN_PASSWORD=admin123
-```
-
-### 3.3. Gerar chaves
-
-```cmd
-php artisan key:generate
-php artisan jwt:secret
-```
-
-### 3.4. Otimizar caches
-
-```cmd
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-```
-
----
-
-## 🎨 PARTE 4 — Buildar o frontend (React) no Windows
+## ⚙️ PARTE 3 — Gerar o backend CodeIgniter 4
 
 ```cmd
 cd C:\Projetos\jb-multimarcas
+composer create-project codeigniter4/appstarter backend-tmp
+xcopy /E /Y /I backend backend-tmp
+rmdir /S /Q backend
+ren backend-tmp backend
+cd backend
+copy env .env
 ```
 
-O arquivo `.env.production` já está com:
+Edite `backend\.env` e ajuste (já vem preenchido no `env`):
 
 ```env
-VITE_API_URL="https://jbmultimarcaas.com.br/api"
+CI_ENVIRONMENT = production
+app.baseURL = 'https://jbmultimarcaas.com.br/api/'
+app.indexPage = ''
+app.forceGlobalSecureRequests = true
+
+app.sessionCookieName = 'jb_session'
+cookie.secure = true
+cookie.samesite = 'Lax'
+
+app.corsAllowedOrigins = 'https://jbmultimarcaas.com.br,https://www.jbmultimarcaas.com.br'
+
+database.default.hostname = localhost
+database.default.database = jbmultimarcaas2_jbmulti
+database.default.username = jbmultimarcaas2_jbadmin
+database.default.password = Vodin4s@
+database.default.DBDriver = MySQLi
 ```
 
-Gere o build:
+---
+
+## 🎨 PARTE 4 — Buildar o frontend
 
 ```cmd
+cd C:\Projetos\jb-multimarcas
 npm install
 npm run build
 ```
 
-Isso cria a pasta `dist\` — é ela que vai para o `public_html`.
+`.env.production` já contém `VITE_API_URL="https://jbmultimarcaas.com.br/api"`.
 
 ---
 
-## 🔗 PARTE 5 — Adaptar o `index.php` do Laravel
+## 🔗 PARTE 5 — Adaptar o `index.php` do CodeIgniter
 
-Copie `backend\public\index.php` para `backend\public\index-prod.php` e troque
-os caminhos para apontar **um nível acima** do `public_html`:
+Copie `backend\public\index.php` para `backend\public\index-prod.php` e
+troque para apontar ao `ci/` (fora do `public_html`):
 
 ```php
 <?php
-use Illuminate\Http\Request;
-define('LARAVEL_START', microtime(true));
+// Bridge do CI 4 rodando em public_html/api/
+define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
 
-if (file_exists($maintenance = __DIR__.'/../laravel/storage/framework/maintenance.php')) {
-    require $maintenance;
-}
+$pathsPath = realpath(FCPATH . '../../ci/app/Config/Paths.php');
+require $pathsPath;
 
-require __DIR__.'/../laravel/vendor/autoload.php';
+$paths = new Config\Paths();
+require rtrim($paths->systemDirectory, '\\/ ') . DIRECTORY_SEPARATOR . 'bootstrap.php';
 
-(require_once __DIR__.'/../laravel/bootstrap/app.php')
-    ->handleRequest(Request::capture());
+$app = \Config\Services::codeigniter();
+$app->initialize();
+$app->setContext(is_cli() ? 'php-cli' : 'web');
+$app->run();
 ```
+
+> Alternativa mais limpa: criar subdomínio `api.jbmultimarcaas.com.br`
+> apontando para `ci/public/` e usar o `index.php` original sem mexer.
 
 ---
 
 ## 📤 PARTE 6 — Upload via FileZilla
 
-**Caminho no FileZilla:** `Arquivo → Gerenciador de Sites → Novo Site`
-- Host: (o que a Locaweb passou, ex.: `ftp.jbmultimarcaas.com.br`)
-- Usuário / Senha: (do FTP)
-- Conectar
+### 6.1. `ci/` para `/home/jbmultimarcaas2/ci/`
+Envie tudo de `backend\` **EXCETO** a pasta `public\`.
 
-### 6.1. Enviar o Laravel para `/home/jbmultimarcaas2/laravel/`
-
-No painel direito (servidor), suba um nível acima de `public_html`, crie a pasta
-`laravel/` e envie **todo o conteúdo de `C:\Projetos\jb-multimarcas\backend\`
-EXCETO a pasta `public\`**.
-
-### 6.2. Enviar o frontend + bridge para `public_html/`
-
-Dentro de `public_html/`:
-1. Envie **todo o conteúdo de `C:\Projetos\jb-multimarcas\dist\`**
-2. Envie `C:\Projetos\jb-multimarcas\backend\public\index-prod.php` e
-   **renomeie para `index.php`** no servidor
-3. Envie `C:\Projetos\jb-multimarcas\backend\public\.htaccess-locaweb` e
-   **renomeie para `.htaccess`** no servidor
-4. Crie a pasta `uploads/cars/` (vazia)
+### 6.2. Frontend para `public_html/`
+1. Envie tudo de `dist\`
+2. Crie `public_html/api/` e envie:
+   - `backend\public\index-prod.php` renomeado para `index.php`
+   - `backend\public\.htaccess`
+3. Crie `public_html/uploads/cars/` vazia
 
 ---
 
-## 🗃️ PARTE 7 — Rodar as migrations no banco de produção
+## 🗃️ PARTE 7 — Criar as tabelas
 
-### Opção A — Com SSH (recomendado)
-
-No CMD do Windows:
-
+**Opção A — SSH:**
 ```cmd
 ssh jbmultimarcaas2@jbmultimarcaas.com.br
-cd laravel
-php artisan migrate --seed --force
+cd ci
+php spark migrate
+php spark db:seed AdminSeeder
 ```
 
-### Opção B — Sem SSH, via phpMyAdmin
-
-**Caminho:** `cPanel → Bancos de Dados → phpMyAdmin`
-
-1. Selecione o banco `jbmultimarcaas2_jbmulti` na esquerda
-2. Aba **Importar** → escolha o arquivo
-   `C:\Projetos\jb-multimarcas\backend\database\schema.sql` → **Executar**
-3. Isso cria as tabelas E o usuário admin (`admin@jbmultimarcas.com.br` / `admin123`)
+**Opção B — phpMyAdmin:** importe `backend\schema.sql`.
 
 ---
 
-## 🔐 PARTE 8 — Permissões (via FileZilla)
+## 🔐 PARTE 8 — Permissões
 
-Clique com o **botão direito** em cada pasta abaixo → **Permissões de arquivo** → `775`
-e marque **Recorrer aos subdiretórios**:
+Botão direito no FileZilla → **Permissões de arquivo** → `775` +
+**Recorrer aos subdiretórios** em:
 
-- `laravel/storage/`
-- `laravel/bootstrap/cache/`
+- `ci/writable/`
 - `public_html/uploads/`
 
 ---
 
 ## ✅ PARTE 9 — Testar
-
-Abra no navegador:
 
 | URL | Deve mostrar |
 |---|---|
@@ -257,34 +183,33 @@ Abra no navegador:
 | `https://jbmultimarcaas.com.br/api/cars` | `[]` (JSON vazio) |
 | `https://jbmultimarcaas.com.br/auth` | Tela de login |
 
-Faça login com **`admin@jbmultimarcas.com.br` / `admin123`**, cadastre um
-veículo com foto, e confira em `/`.
+Login: `admin@jbmultimarcas.com.br` / `admin123`.
 
 ---
 
-## 🆘 Se algo der errado
+## 🆘 Problemas comuns
 
-| Sintoma | Causa provável | Solução |
+| Sintoma | Causa | Solução |
 |---|---|---|
-| **Erro 500** ao abrir o site | Permissões ou `.env` errado | `chmod 775 storage bootstrap/cache` e conferir credenciais do banco |
-| **/api/cars retorna HTML** | `.htaccess` não subiu / mod_rewrite off | Reenviar `.htaccess` e ativar mod_rewrite no cPanel |
-| **CORS bloqueado no console** | Domínio errado em `CORS_ALLOWED_ORIGINS` | Editar `.env` e rodar `php artisan config:cache` |
-| **Login "Failed to fetch"** | `VITE_API_URL` errado no build | Ajustar `.env.production`, `npm run build` e reenviar `dist/` |
-| **"No application encryption key"** | Faltou rodar `php artisan key:generate` | Rodar localmente e reenviar `.env` |
-| **Erro de conexão MySQL** | Nome do banco/usuário sem prefixo | Trocar para `jbmultimarcaas2_jbmulti` / `jbmultimarcaas2_jbadmin` |
+| **500 no /api** | Permissões / `.env` | `chmod 775 ci/writable`, conferir DB |
+| **/api/cars retorna HTML** | `.htaccess` não subiu | Reenviar e ativar mod_rewrite |
+| **CORS bloqueado** | Origem faltando | Ajustar `app.corsAllowedOrigins` no `.env` |
+| **Login OK mas /admin volta pro login** | Cookie não persiste | HTTPS ativo + `cookie.secure=true` + `samesite='Lax'` |
+| **"Session driver not found"** | `ci/writable/session/` sem permissão | `chmod 775` recursivo em `ci/writable` |
+| **Erro MySQL** | Falta prefixo | Usar `jbmultimarcaas2_jbmulti` / `jbmultimarcaas2_jbadmin` |
 
 ---
 
 ## 📌 Checklist final
 
-- [ ] Banco `jbmulti` criado no cPanel com usuário `jbadmin`
-- [ ] `backend\.env` com credenciais corretas + `APP_KEY` + `JWT_SECRET`
-- [ ] `composer install --no-dev` rodado
+- [ ] Banco criado no cPanel
+- [ ] `backend\.env` correto
+- [ ] `composer create-project` rodado e mesclado
 - [ ] `npm run build` gerou `dist/`
-- [ ] `laravel/` enviado FORA do `public_html`
-- [ ] `dist/` + `index.php` (adaptado) + `.htaccess` dentro de `public_html`
-- [ ] Migrations rodadas (SSH ou schema.sql)
-- [ ] Permissões 775 em `storage`, `bootstrap/cache`, `uploads`
+- [ ] `ci/` fora do `public_html`
+- [ ] `dist/` + `api/index.php` + `.htaccess` em `public_html`
+- [ ] Migrations rodadas
+- [ ] Permissões 775 em `ci/writable` e `uploads`
 - [ ] `/api/cars` responde `[]`
 - [ ] Login admin funciona
 - [ ] Senha do admin trocada

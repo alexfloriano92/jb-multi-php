@@ -1,0 +1,35 @@
+#--------------------------------------------------------------------
+# Copie este arquivo como `.env` (sem extensão) na raiz do backend
+# e ajuste os valores. Nunca faça commit do `.env` real.
+#--------------------------------------------------------------------
+
+CI_ENVIRONMENT = production
+
+#--------------------------------------------------------------------
+# APP
+#--------------------------------------------------------------------
+app.baseURL = 'https://jbmultimarcaas.com.br/'
+app.indexPage = ''
+app.forceGlobalSecureRequests = true
+
+app.sessionCookieName = 'jb_session'
+cookie.secure = true
+cookie.samesite = 'Lax'
+
+app.corsAllowedOrigins = 'https://jbmultimarcaas.com.br,https://www.jbmultimarcaas.com.br'
+
+app.adminEmail    = 'admin@jbmultimarcas.com.br'
+app.adminPassword = 'admin123'
+
+#--------------------------------------------------------------------
+# DATABASE
+#--------------------------------------------------------------------
+database.default.hostname = localhost
+database.default.database = jbmultimarcaas2_jbmulti
+database.default.username = jbmultimarcaas2_jbadmin
+database.default.password = Vodin4s@
+database.default.DBDriver = MySQLi
+database.default.DBPrefix =
+database.default.port     = 3306
+database.default.charset  = utf8mb4
+database.default.DBCollat = utf8mb4_unicode_ci

@@ -83,6 +83,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:site_name", content: "JB Multimarcas" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:title", content: "JB Multimarcas | Veículos Novos e Seminovos em MG" },
+      { name: "twitter:title", content: "JB Multimarcas | Veículos Novos e Seminovos em MG" },
+      { name: "description", content: "Concessionária em Cachoeira de Minas - MG. Veículos novos e seminovos com procedência: compra, venda, troca e financiamento com atendimento próximo." },
+      { property: "og:description", content: "Concessionária em Cachoeira de Minas - MG. Veículos novos e seminovos com procedência: compra, venda, troca e financiamento com atendimento próximo." },
+      { name: "twitter:description", content: "Concessionária em Cachoeira de Minas - MG. Veículos novos e seminovos com procedência: compra, venda, troca e financiamento com atendimento próximo." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/59528f2a-540a-4b10-9156-634ff8eb63aa/id-preview-10959027--0d94776c-852f-4ee3-be64-ebdb7f21f5b8.lovable.app-1783305492543.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/59528f2a-540a-4b10-9156-634ff8eb63aa/id-preview-10959027--0d94776c-852f-4ee3-be64-ebdb7f21f5b8.lovable.app-1783305492543.png" },
     ],
     links: [
       {

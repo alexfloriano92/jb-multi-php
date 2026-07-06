@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Admin — JB Multimarcas</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="icon" href="assets/images/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    :root{--gold:#FFC501;--bg:#080810;--surface:#0f0f1a;--card:#13131f;--border:#1e1e2e;--text:#fff;--muted:#9aa0c0;}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+    /* LOGIN */
+    .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at top,#14142a 0%,#080810 55%,#000 100%)}
+    .login-card{background:rgba(19,19,31,.85);backdrop-filter:blur(12px);padding:48px 40px;border-radius:20px;width:100%;max-width:440px;border:1px solid rgba(255,197,1,.15);box-shadow:0 30px 80px -20px rgba(255,197,1,.15),0 0 0 1px rgba(255,255,255,.03)}
+    .login-logo{text-align:center;margin-bottom:36px}
+    .login-logo-circle{display:inline-flex;align-items:center;justify-content:center;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,197,1,.12) 0%,transparent 70%);margin-bottom:8px}
+    .login-logo-circle img{width:150px;height:auto;filter:drop-shadow(0 4px 24px rgba(255,197,1,.3))}
+    .login-title{font-size:22px;font-family:'Outfit',sans-serif;font-weight:600;letter-spacing:.5px;margin-top:8px}
+    .login-sub{font-size:13px;color:var(--muted);margin-top:6px}
+    .field-label{display:block;margin-bottom:6px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+    .field-input{width:100%;padding:14px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:#fff;margin-bottom:18px;font-size:14px;outline:none;font-family:inherit}
+    .btn-primary-full{width:100%;padding:14px;border-radius:10px;background:linear-gradient(135deg,#FFC501 0%,#e5b100 100%);color:#000;font-weight:700;border:none;cursor:pointer;font-size:14px;letter-spacing:.5px;box-shadow:0 8px 24px -8px rgba(255,197,1,.5)}
+    .btn-primary-full:disabled{opacity:.6;cursor:wait}
+    .err-box{color:#f87171;font-size:13px;margin-bottom:14px;padding:10px;background:rgba(248,113,113,.08);border-radius:8px;border:1px solid rgba(248,113,113,.2)}
+    .back-link{display:block;text-align:center;margin-top:20px;color:#6b7280;font-size:12px;text-decoration:none}
+
+    /* PAINEL */
+    .panel{padding:24px;max-width:1200px;margin:0 auto}
+    .panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;flex-wrap:wrap;gap:12px}
+    .panel-brand{display:flex;align-items:center;gap:16px}
+    .panel-brand img{height:48px}
+    .panel-brand h1{font-family:'Outfit',sans-serif;font-size:24px}
+    .panel-user{display:flex;gap:12px;align-items:center}
+    .panel-user a{color:var(--muted);text-decoration:none}
+    .panel-user span{color:var(--muted);font-size:13px}
+    .btn-s{padding:10px 16px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:13px;font-family:inherit}
+    .btn-dark{background:var(--border);color:#fff}
+    .btn-gold{background:var(--gold);color:#000}
+    .btn-danger{background:#7a1e1e;color:#fff}
+    .btn-red{background:#f87171;color:#fff}
+
+    .grid-2{display:grid;grid-template-columns:minmax(0,460px) 1fr;gap:24px;align-items:start}
+    @media(max-width:900px){.grid-2{grid-template-columns:1fr}}
+    .form-card{background:var(--card);padding:24px;border-radius:16px;border:1px solid var(--border);position:sticky;top:24px}
+    .form-card h2{font-family:'Outfit',sans-serif;font-size:18px;margin-bottom:8px}
+    .lb{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;margin-top:10px}
+    .ip{width:100%;padding:10px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:#fff;font-size:14px;font-family:inherit}
+    .grid-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .uploader{border:2px dashed var(--border);border-radius:12px;text-align:center;cursor:pointer;background:var(--surface);min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+    .uploader.has-img{padding:8px}
+    .uploader img{max-width:100%;max-height:180px;border-radius:8px;object-fit:cover}
+    .gal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
+    .gal-thumb{position:relative;aspect-ratio:1/1;border-radius:8px;overflow:hidden;background:var(--surface);border:1px solid var(--border)}
+    .gal-thumb img{width:100%;height:100%;object-fit:cover}
+    .gal-thumb button{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,.7);color:#fff;cursor:pointer;font-size:11px}
+
+    .car-row{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;display:grid;grid-template-columns:80px 1fr auto;gap:16px;align-items:center;margin-bottom:12px}
+    .car-row.sold{opacity:.6}
+    .car-thumb{width:80px;height:60px;border-radius:8px;overflow:hidden;background:var(--surface);display:flex;align-items:center;justify-content:center}
+    .car-thumb img{width:100%;height:100%;object-fit:cover}
+    .car-info{font-weight:700;font-size:15px}
+    .car-info span{color:var(--muted);font-weight:400}
+    .car-meta{color:var(--muted);font-size:13px;margin-top:4px}
+    .car-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+    .badge-star{color:var(--gold);margin-left:8px}
+    .badge-sold{color:#f87171;margin-left:8px}
+  </style>
+</head>
+<body>
+  <!-- Tela de LOGIN -->
+  <div id="loginView" class="login-wrap">
+    <form id="loginForm" class="login-card">
+      <div class="login-logo">
+        <div class="login-logo-circle">
+          <img src="assets/images/logo.png" alt="JB Multimarcas" />
+        </div>
+        <h1 class="login-title">Painel Administrativo</h1>
+        <p class="login-sub">Acesso restrito à equipe JB</p>
+      </div>
+      <label class="field-label">E-mail</label>
+      <input class="field-input" type="email" id="loginEmail" required />
+      <label class="field-label">Senha</label>
+      <input class="field-input" type="password" id="loginPass" required minlength="6" />
+      <div id="loginErr" class="err-box" style="display:none"></div>
+      <button id="loginBtn" class="btn-primary-full" type="submit">Entrar no Painel</button>
+      <a href="index.html" class="back-link">← Voltar ao site</a>
+    </form>
+  </div>
+
+  <!-- PAINEL admin -->
+  <div id="panelView" class="panel" style="display:none">
+    <header class="panel-header">
+      <div class="panel-brand">
+        <img src="assets/images/logo.png" alt="JB" />
+        <h1>Painel Admin</h1>
+      </div>
+      <div class="panel-user">
+        <a href="index.html">← Ver site</a>
+        <span id="userEmail"></span>
+        <button id="logoutBtn" class="btn-s btn-dark">Sair</button>
+      </div>
+    </header>
+
+    <div class="grid-2">
+      <!-- FORM -->
+      <form id="carForm" class="form-card">
+        <h2 id="formTitle">Novo veículo</h2>
+
+        <label class="lb" style="margin-top:12px">Foto do veículo (capa)</label>
+        <div id="uploader" class="uploader">
+          <i class="fas fa-cloud-upload-alt" style="font-size:32px;color:var(--gold);margin-bottom:8px"></i>
+          <div style="font-size:14px;font-weight:600">Clique para enviar uma foto</div>
+          <div style="font-size:12px;color:#6b7280;margin-top:4px">JPG, PNG ou WEBP</div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" style="display:none" />
+        <button type="button" id="removeCover" class="btn-s" style="background:transparent;color:#f87171;padding:6px 0;font-size:12px;margin-top:6px;display:none">Remover imagem</button>
+
+        <label class="lb" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Fotos adicionais (<span id="galCount">0</span>)</span>
+          <button type="button" id="galBtn" class="btn-s" style="background:var(--border);color:var(--gold);padding:6px 10px;font-size:11px">+ Adicionar fotos</button>
+        </label>
+        <input type="file" id="galInput" accept="image/*" multiple style="display:none" />
+        <div id="galGrid" class="gal-grid" style="display:none"></div>
+        <div style="font-size:11px;color:#6b7280;margin-top:6px">A "Foto do veículo" é a capa. As fotos adicionais aparecem na galeria.</div>
+
+        <div class="grid-form" style="margin-top:12px">
+          <div><label class="lb">Marca *</label><input required class="ip" id="fBrand" /></div>
+          <div><label class="lb">Modelo *</label><input required class="ip" id="fModel" /></div>
+          <div><label class="lb">Ano *</label><input type="number" required class="ip" id="fYear" /></div>
+          <div><label class="lb">Km</label><input type="number" class="ip" id="fKm" value="0" /></div>
+          <div><label class="lb">Preço (R$)</label><input type="number" step="0.01" class="ip" id="fPrice" /></div>
+          <div><label class="lb">Cor</label><input class="ip" id="fColor" /></div>
+          <div><label class="lb">Combustível</label>
+            <select class="ip" id="fFuel"><option>Flex</option><option>Gasolina</option><option>Diesel</option><option>Etanol</option><option>Elétrico</option><option>Híbrido</option></select>
+          </div>
+          <div><label class="lb">Câmbio</label>
+            <select class="ip" id="fTrans"><option>Manual</option><option>Automático</option><option>CVT</option><option>Automatizado</option></select>
+          </div>
+          <div style="grid-column:span 2"><label class="lb">Categoria (novo, seminovo, suv, pickup — separadas por espaço)</label><input class="ip" id="fCat" value="seminovo" /></div>
+          <div style="grid-column:span 2"><label class="lb">Descrição</label><textarea rows="3" class="ip" id="fDesc"></textarea></div>
+          <div><label class="lb">Ordem</label><input type="number" class="ip" id="fOrder" value="0" /></div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:20px">
+            <label style="display:flex;gap:8px;align-items:center;font-size:13px"><input type="checkbox" id="fFeatured" /> Destaque</label>
+            <label style="display:flex;gap:8px;align-items:center;font-size:13px"><input type="checkbox" id="fSold" /> Vendido</label>
+          </div>
+        </div>
+        <div id="formErr" class="err-box" style="display:none;margin-top:12px"></div>
+        <div style="display:flex;gap:8px;margin-top:20px">
+          <button type="submit" id="saveBtn" class="btn-s btn-gold" style="flex:1">Adicionar veículo</button>
+          <button type="button" id="cancelBtn" class="btn-s btn-dark" style="display:none">Cancelar</button>
+        </div>
+      </form>
+
+      <!-- LISTA -->
+      <div>
+        <h2 style="font-family:'Outfit',sans-serif;font-size:18px;margin-bottom:12px">Veículos cadastrados (<span id="carsCount">0</span>)</h2>
+        <div id="carsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/admin.js"></script>
+</body>
+</html>

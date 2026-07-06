@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JB Multimarcas — Veículos 0KM e Seminovos em Cachoeira de Minas</title>
+  <meta name="description" content="Concessionária JB Multimarcas em Cachoeira de Minas: veículos 0KM, seminovos, troca com avaliação, financiamento e atendimento personalizado." />
+  <meta property="og:title" content="JB Multimarcas — Cachoeira de Minas" />
+  <meta property="og:description" content="Veículos 0KM e seminovos com procedência garantida, preço justo e o melhor atendimento de Cachoeira de Minas." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="assets/images/logo.png" />
+
+  <!-- Fontes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Ícones -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <div class="jb-app">
+    <!-- NAVBAR -->
+    <nav id="navbar">
+      <a href="#hero" class="nav-logo">
+        <img src="assets/images/logo.png" alt="JB Multimarcas" class="nav-logo-img" />
+      </a>
+      <ul class="nav-links">
+        <li><a href="#catalogo">Catálogo</a></li>
+        <li><a href="#sobre">Sobre</a></li>
+        <li><a href="#avaliacoes">Avaliações</a></li>
+        <li><a href="#contato" class="nav-cta">Falar Conosco</a></li>
+        <li>
+          <a href="admin.html" class="jb-admin-key" title="Área restrita" aria-label="Painel administrativo">
+            <span class="jb-admin-key__icon"><i class="fas fa-key"></i></span>
+            <span class="jb-admin-key__label">Restrito</span>
+            <span class="jb-admin-key__shine" aria-hidden="true"></span>
+          </a>
+        </li>
+      </ul>
+      <button id="navHamburger" class="nav-hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+
+    <div id="mobileMenu" class="mobile-menu">
+      <a href="#catalogo">Catálogo</a>
+      <a href="#sobre">Sobre</a>
+      <a href="#avaliacoes">Avaliações</a>
+      <a href="#contato">Contato</a>
+    </div>
+
+    <!-- HERO -->
+    <section id="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-overlay-bottom"></div>
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <span class="sr-only">JB Multimarcas — Veículos 0KM e Seminovos em Cachoeira de Minas. </span>
+          A <span class="gold-text">Escolha</span><br />
+          Perfeita Para<br />Você
+        </h1>
+        <p class="hero-subtitle">
+          Veículos 0KM e seminovos com procedência garantida, preço justo e o melhor atendimento de Cachoeira de Minas.
+        </p>
+        <div class="hero-stats">
+          <div class="hero-stat-item"><div class="hero-stat-number">Avaliação</div><div class="hero-stat-label">5⭐</div></div>
+          <div class="hero-stat-item"><div class="hero-stat-number">4+</div><div class="hero-stat-label">Anos no Mercado</div></div>
+          <div class="hero-stat-item"><div class="hero-stat-number">100%</div><div class="hero-stat-label">Satisfação</div></div>
+        </div>
+        <div class="hero-buttons">
+          <a href="#catalogo" class="btn-primary"><i class="fas fa-car"></i>Ver Catálogo</a>
+          <a id="heroWhats" href="#" target="_blank" rel="noreferrer" class="btn-secondary">
+            <i class="fab fa-whatsapp"></i>Falar no WhatsApp
+          </a>
+        </div>
+      </div>
+      <div class="hero-scroll-indicator">
+        <div class="scroll-mouse"></div>
+        <span>Role para baixo</span>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <div id="services-strip">
+      <div class="services-strip-inner">
+        <div class="service-strip-item"><div class="service-strip-icon"><i class="fas fa-tag"></i></div><div class="service-strip-text"><strong>Compra &amp; Venda</strong><span>Melhores preços do mercado</span></div></div>
+        <div class="service-strip-item"><div class="service-strip-icon"><i class="fas fa-exchange-alt"></i></div><div class="service-strip-text"><strong>Troca de Veículos</strong><span>Avaliação na hora</span></div></div>
+        <div class="service-strip-item"><div class="service-strip-icon"><i class="fas fa-handshake"></i></div><div class="service-strip-text"><strong>Troca com Avaliação</strong><span>Avaliamos seu carro na hora</span></div></div>
+        <div class="service-strip-item"><div class="service-strip-icon"><i class="fas fa-coffee"></i></div><div class="service-strip-text"><strong>Venha nos Visitar</strong><span>Um cafezinho te espera!</span></div></div>
+      </div>
+    </div>
+
+    <!-- CATÁLOGO -->
+    <section id="catalogo">
+      <div class="section-header fade-in-up">
+        <div class="section-tag"><i class="fas fa-car"></i> Estoque</div>
+        <h2 class="section-title">Nosso <span class="gold">Catálogo</span></h2>
+        <p class="section-subtitle">Veículos selecionados com procedência garantida. 0KM e seminovos esperando por você.</p>
+      </div>
+
+      <div class="catalog-search-wrapper fade-in-up">
+        <div class="catalog-search-box">
+          <span class="catalog-search-icon"><i class="fas fa-search"></i></span>
+          <input id="searchInput" type="text" placeholder="Buscar por marca ou modelo... ex: Toyota, Onix, Hilux" autocomplete="off" />
+          <button id="searchClear" class="catalog-search-clear" style="display:none" title="Limpar busca" aria-label="Limpar busca">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div id="suggestions" class="catalog-suggestions"></div>
+      </div>
+
+      <div id="brandPills" class="catalog-brand-pills fade-in-up"></div>
+
+      <div id="resultInfo" class="catalog-result-info">
+        <i class="fas fa-filter"></i>
+        <span id="resultInfoText"></span>
+        <button id="resultClear" class="result-clear-btn">Limpar filtro</button>
+      </div>
+
+      <div class="catalog-filters fade-in-up">
+        <button class="filter-btn active" data-cat="todos">Todos</button>
+        <button class="filter-btn" data-cat="novo">0KM / Novos</button>
+        <button class="filter-btn" data-cat="seminovo">Seminovos</button>
+        <button class="filter-btn" data-cat="suv">SUVs</button>
+        <button class="filter-btn" data-cat="pickup">Pickups</button>
+      </div>
+
+      <div id="vehiclesGrid" class="vehicles-grid">
+        <div id="noResults" class="catalog-no-results">
+          <div class="no-results-icon"><i class="fas fa-car-side"></i></div>
+          <div class="no-results-title">Nenhum veículo encontrado</div>
+          <p class="no-results-text">Não encontramos veículos com esse nome.<br />Tente buscar por outra marca ou modelo.</p>
+          <a id="noResultsWhats" href="#" target="_blank" rel="noreferrer" class="btn-primary" style="display:inline-flex">
+            <i class="fab fa-whatsapp"></i> Perguntar pelo WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <div class="catalog-cta-wrapper fade-in-up">
+        <a id="catalogWhats" href="#" target="_blank" rel="noreferrer" class="btn-primary">
+          <i class="fab fa-whatsapp"></i> Ver Todo o Estoque no WhatsApp
+        </a>
+      </div>
+    </section>
+
+    <!-- SOBRE -->
+    <section id="sobre">
+      <div class="sobre-grid">
+        <div class="sobre-image-wrapper fade-in-up">
+          <div class="sobre-card-float2"><i class="fas fa-handshake icon-big"></i></div>
+          <div class="sobre-image-main">
+            <img src="assets/images/sobre.png" alt="Loja JB Multimarcas em Cachoeira de Minas" loading="lazy" />
+          </div>
+          <div class="sobre-card-float">
+            <div class="number">5⭐</div>
+            <div class="text">Avaliações 5 estrelas<br />no Google</div>
+          </div>
+        </div>
+        <div class="sobre-content fade-in-up">
+          <div class="section-tag"><i class="fas fa-heart"></i> Nossa História</div>
+          <h2 class="section-title">Nascemos da <span class="gold">Amizade</span><br />e do Sonho</h2>
+          <p>A JB Multimarcas surgiu da iniciativa de dois amigos, <strong style="color:var(--text-primary)">Júnior e Bruno</strong>. Em 2020, por acaso, venderam juntos o primeiro carro — e isso se tornou recorrente.</p>
+          <p>Em julho de 2021, criaram o Instagram para ampliar o alcance do negócio, batizando-o de JB Multimarcas. Em fevereiro de 2024, finalmente tiraram do papel o projeto mais esperado: <strong style="color:var(--gold)">a loja física!</strong></p>
+          <p>Hoje, nossa loja em Cachoeira de Minas é o lugar ideal para você garantir seu veículo com segurança, conforto e, claro, um delicioso cafezinho! ☕</p>
+          <div class="sobre-founders">
+            <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:12px">
+                <div class="founder-avatar" style="background:var(--gradient-gold)">J</div>
+                <div class="founder-info"><strong>Júnior</strong><span>Co-fundador</span></div>
+              </div>
+              <div style="width:1px;height:40px;background:var(--dark-border);margin:0 8px"></div>
+              <div style="display:flex;align-items:center;gap:12px">
+                <div class="founder-avatar" style="background:linear-gradient(135deg,#7eb3ff,#5090e0);color:#000">B</div>
+                <div class="founder-info"><strong>Bruno</strong><span>Co-fundador</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="sobre-timeline">
+            <div class="timeline-item"><span class="timeline-year">2020</span><span class="timeline-desc">Primeira venda realizada — o começo de tudo!</span></div>
+            <div class="timeline-item"><span class="timeline-year">2021</span><span class="timeline-desc">Criação do Instagram @jb.multimarcaas e crescimento do negócio.</span></div>
+            <div class="timeline-item"><span class="timeline-year">2024</span><span class="timeline-desc">Inauguração da loja física em Cachoeira de Minas — MG!</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AVALIAÇÕES -->
+    <section id="avaliacoes">
+      <div class="avaliacoes-header-flex">
+        <div class="fade-in-up">
+          <div class="section-tag"><i class="fas fa-star"></i> Google Reviews</div>
+          <h2 class="section-title">O Que Nossos<br /><span class="gold">Clientes Dizem</span></h2>
+        </div>
+        <div class="rating-summary fade-in-up">
+          <div><div class="rating-big">5,0</div></div>
+          <div>
+            <div class="rating-stars">★★★★★</div>
+            <div class="rating-count">Avaliações positivas no Google</div>
+          </div>
+        </div>
+      </div>
+      <div class="reviews-grid">
+        <div class="review-card fade-in-up"><div class="review-stars">★★★★★</div><p class="review-text">"Excelente atendimento, além de carros de procedência e preço justo!"</p><div class="review-author"><div class="review-avatar" style="background:linear-gradient(135deg,#f4b942,#e8932a)">E</div><div class="review-author-info"><strong>Eder Fernandes</strong><span>Cliente verificado</span></div></div><div class="google-badge"><i class="fab fa-google"></i> Avaliação no Google</div></div>
+        <div class="review-card fade-in-up"><div class="review-stars">★★★★★</div><p class="review-text">"Ofereceu uma boa oportunidade no veículo escolhido. Super recomendo a JB Multimarcas!"</p><div class="review-author"><div class="review-avatar" style="background:linear-gradient(135deg,#4285f4,#2060c0)">J</div><div class="review-author-info"><strong>Jean Victor</strong><span>Cliente verificado</span></div></div><div class="google-badge"><i class="fab fa-google"></i> Avaliação no Google</div></div>
+        <div class="review-card fade-in-up"><div class="review-stars">★★★★★</div><p class="review-text">"Atendimento personalizado, variedade de opções. Encontrei exatamente o que queria!"</p><div class="review-author"><div class="review-avatar" style="background:linear-gradient(135deg,#34a853,#1e7a35)">S</div><div class="review-author-info"><strong>Search 360</strong><span>Cliente verificado</span></div></div><div class="google-badge"><i class="fab fa-google"></i> Avaliação no Google</div></div>
+        <div class="review-card fade-in-up"><div class="review-stars">★★★★★</div><p class="review-text">"Fui bem recebido, tomei um cafezinho gostoso e saí com meu carro novo. Recomendo muito!"</p><div class="review-author"><div class="review-avatar" style="background:linear-gradient(135deg,#FFC501,#E5B000)">M</div><div class="review-author-info"><strong>Marcos Alves</strong><span>Cliente verificado</span></div></div><div class="google-badge"><i class="fab fa-google"></i> Avaliação no Google</div></div>
+        <div class="review-card fade-in-up"><div class="review-stars">★★★★★</div><p class="review-text">"Processo de financiamento super rápido e facilitado. Equipe muito atenciosa e transparente!"</p><div class="review-author"><div class="review-avatar" style="background:linear-gradient(135deg,#e91e63,#880e4f)">A</div><div class="review-author-info"><strong>Ana Lima</strong><span>Cliente verificado</span></div></div><div class="google-badge"><i class="fab fa-google"></i> Avaliação no Google</div></div>
+        <div class="review-card fade-in-up"><div class="review-stars">★★★★★</div><p class="review-text">"Carros de ótima procedência, preços honestos. A JB Multimarcas é referência na cidade!"</p><div class="review-author"><div class="review-avatar" style="background:linear-gradient(135deg,#9c27b0,#6a0080)">R</div><div class="review-author-info"><strong>Roberto Costa</strong><span>Cliente verificado</span></div></div><div class="google-badge"><i class="fab fa-google"></i> Avaliação no Google</div></div>
+      </div>
+    </section>
+
+    <!-- CONTATO -->
+    <section id="contato">
+      <div class="section-header fade-in-up">
+        <div class="section-tag"><i class="fas fa-map-marker-alt"></i> Visite-nos</div>
+        <h2 class="section-title">Venha nos <span class="gold">Conhecer</span></h2>
+        <p class="section-subtitle">Nossa loja está esperando por você em Cachoeira de Minas. Venha tomar um cafezinho!</p>
+      </div>
+      <div class="contato-grid">
+        <div class="contact-info-card fade-in-up">
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div class="contact-info-text">
+              <strong>Endereço</strong>
+              <span>Av. Perimetral João Dionísio Filho, 638<br />Bairro do Rosário, Cachoeira de Minas - MG<br />CEP: 37545-000</span>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-phone-alt"></i></div>
+            <div class="contact-info-text">
+              <strong>Telefone / WhatsApp</strong>
+              <a href="https://wa.me/5535999091119" target="_blank" rel="noreferrer">(35) 99909-1119</a>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fab fa-instagram"></i></div>
+            <div class="contact-info-text">
+              <strong>Instagram</strong>
+              <a href="https://instagram.com/jb.multimarcaas" target="_blank" rel="noreferrer">@jb.multimarcaas</a>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-clock"></i></div>
+            <div class="contact-info-text">
+              <strong>Horário de Funcionamento</strong>
+              <div class="horario-grid">
+                <div class="horario-item"><span class="day">Segunda</span><span class="time">07:30 – 18:00</span></div>
+                <div class="horario-item"><span class="day">Terça</span><span class="time">07:30 – 17:00</span></div>
+                <div class="horario-item"><span class="day">Quarta</span><span class="time">07:30 – 17:00</span></div>
+                <div class="horario-item"><span class="day">Quinta</span><span class="time">07:30 – 17:00</span></div>
+                <div class="horario-item"><span class="day">Sexta</span><span class="time">07:30 – 17:00</span></div>
+                <div class="horario-item"><span class="day">Sábado</span><span class="time">08:00 – 12:00</span></div>
+                <div class="horario-item closed"><span class="day">Domingo</span><span class="time">Fechado</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="map-wrapper">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3752.0!2d-45.764!3d-22.351!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjLCsDIxJzAzLjYiUyA0NcKwNDUnNTAuNCJX!5e0!3m2!1spt-BR!2sbr!4v1234567890" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Localização JB Multimarcas"></iframe>
+          </div>
+        </div>
+        <div class="contact-form-card fade-in-up">
+          <h3>Agende um <span style="color:var(--gold)">Test Drive</span></h3>
+          <form id="contactForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="c-nome">Seu Nome</label>
+                <input type="text" class="form-control" id="c-nome" placeholder="João Silva" required />
+              </div>
+              <div class="form-group">
+                <label for="c-tel">WhatsApp</label>
+                <input type="tel" class="form-control" id="c-tel" placeholder="(35) 99999-9999" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="c-email">E-mail (opcional)</label>
+              <input type="email" class="form-control" id="c-email" placeholder="joao@email.com" />
+            </div>
+            <div class="form-group">
+              <label for="c-int">Veículo de Interesse</label>
+              <select class="form-control" id="c-int">
+                <option value="">Selecione ou descreva...</option>
+                <option>Outro / Não tenho preferência</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="c-msg">Mensagem</label>
+              <textarea class="form-control" id="c-msg" rows="4" placeholder="Olá! Gostaria de agendar um test drive..." style="resize:vertical"></textarea>
+            </div>
+            <button type="submit" class="btn-submit">
+              <i class="fab fa-whatsapp"></i> Enviar via WhatsApp
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#hero" class="nav-logo" style="margin-bottom:0">
+            <img src="assets/images/logo.png" alt="JB Multimarcas" class="nav-logo-img" style="height:80px" />
+          </a>
+          <p>A melhor concessionária de veículos novos e seminovos de Cachoeira de Minas. Compra, venda, troca e financiamento com atendimento de qualidade.</p>
+          <div class="footer-social">
+            <a href="https://wa.me/5535999091119" target="_blank" rel="noreferrer" class="social-btn" title="WhatsApp" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://instagram.com/jb.multimarcaas" target="_blank" rel="noreferrer" class="social-btn" title="Instagram" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://g.co/kgs/JBMultimarcas" target="_blank" rel="noreferrer" class="social-btn" title="Google" aria-label="Google"><i class="fab fa-google"></i></a>
+          </div>
+        </div>
+        <div>
+          <div class="footer-heading">Navegação</div>
+          <ul class="footer-links">
+            <li><a href="#catalogo">Catálogo de Veículos</a></li>
+            <li><a href="#sobre">Nossa História</a></li>
+            <li><a href="#avaliacoes">Avaliações</a></li>
+            <li><a href="#contato">Contato</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-heading">Serviços</div>
+          <ul class="footer-links">
+            <li><a href="#catalogo">Veículos 0KM</a></li>
+            <li><a href="#catalogo">Seminovos</a></li>
+            <li><a href="#contato">Troca de Veículo</a></li>
+            <li><a href="#contato">Test Drive</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-heading">Contato</div>
+          <ul class="footer-links">
+            <li>Av. Perimetral João Dionísio Filho, 638</li>
+            <li>Cachoeira de Minas - MG</li>
+            <li>(35) 99909-1119</li>
+            <li>@jb.multimarcaas</li>
+          </ul>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--dark-border);padding-top:24px;text-align:center;color:var(--text-muted);font-size:14px">
+        © <span id="year"></span> JB Multimarcas · Todos os direitos reservados
+      </div>
+    </footer>
+
+    <div id="whatsapp-float">
+      <a id="floatWhats" href="#" target="_blank" rel="noreferrer" class="whatsapp-btn">
+        <i class="fab fa-whatsapp"></i>
+        <span class="btn-text">Falar no WhatsApp</span>
+      </a>
+    </div>
+
+    <!-- Modal do carro (renderizado por JS) -->
+    <div id="carModal"></div>
+  </div>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

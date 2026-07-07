@@ -8,6 +8,16 @@
 // Path do FrontController (esta pasta public_html/api/)
 define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
 
+if (isset($_GET['check_bridge'])) {
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        'ok' => true,
+        'bridge' => 'jb_multimarcas_ci45',
+        'version' => '2026-07-07-bootphp',
+    ]);
+    exit;
+}
+
 $pathsPath = realpath(FCPATH . '../../ci/app/Config/Paths.php');
 if ($pathsPath === false) {
     http_response_code(500);

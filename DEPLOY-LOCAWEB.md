@@ -124,12 +124,10 @@ $pathsPath = realpath(FCPATH . '../../ci/app/Config/Paths.php');
 require $pathsPath;
 
 $paths = new Config\Paths();
-require rtrim($paths->systemDirectory, '\\/ ') . DIRECTORY_SEPARATOR . 'bootstrap.php';
+require realpath($paths->systemDirectory . '/Boot.php')
+    ?: $paths->systemDirectory . '/Boot.php';
 
-$app = \Config\Services::codeigniter();
-$app->initialize();
-$app->setContext(is_cli() ? 'php-cli' : 'web');
-$app->run();
+exit(CodeIgniter\Boot::bootWeb($paths));
 ```
 
 > Alternativa mais limpa: criar subdomínio `api.jbmultimarcaas.com.br`

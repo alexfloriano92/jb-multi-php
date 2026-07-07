@@ -92,6 +92,7 @@ function wireForm() {
   fi.addEventListener("change", async () => {
     const f = fi.files?.[0]; if (!f) return;
     await uploadCover(f);
+    fi.value = "";
   });
   document.getElementById("removeCover").addEventListener("click", () => {
     form.image_url = ""; renderUploader();
@@ -185,10 +186,17 @@ function renderGallery() {
 
 async function uploadCover(file) {
   try {
+    const up = document.getElementById("uploader");
+    up.classList.remove("has-img");
+    up.innerHTML = `<div style="color:var(--gold);font-size:14px"><i class="fas fa-spinner fa-spin" style="margin-right:8px"></i>Enviando ${escapeHtml(file.name)}...</div>`;
     const url = await uploadFile(file);
     form.image_url = url;
     renderUploader();
-  } catch (e) { showFormErr(e.message); }
+  } catch (e) {
+    console.error("Upload falhou:", e);
+    showFormErr("Upload falhou: " + (e.message || e));
+    renderUploader();
+  }
 }
 
 async function uploadFile(file) {

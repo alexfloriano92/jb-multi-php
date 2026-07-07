@@ -3,7 +3,7 @@
 Guia passo a passo para publicar **frontend (React) + backend (CodeIgniter 4 + MySQL)**
 na Hospedagem **Locaweb Go / cPanel** usando o domínio **`jbmultimarcaas.com.br`**.
 
-Tudo assume que você está no **Windows** com o projeto em `C:\Projetos\jb-multimarcas\`.
+Tudo assume que você está no **Windows** com o projeto em `C:\Users\User\jb-multi-php\`.
 
 ---
 
@@ -66,7 +66,7 @@ Tudo assume que você está no **Windows** com o projeto em `C:\Projetos\jb-mult
 ## ⚙️ PARTE 3 — Gerar o backend CodeIgniter 4
 
 ```cmd
-cd C:\Projetos\jb-multimarcas
+cd C:\Users\User\jb-multi-php
 composer create-project codeigniter4/appstarter backend-tmp
 xcopy /E /Y /I backend backend-tmp
 rmdir /S /Q backend
@@ -101,7 +101,7 @@ database.default.DBDriver = MySQLi
 ## 🎨 PARTE 4 — Buildar o frontend
 
 ```cmd
-cd C:\Projetos\jb-multimarcas
+cd C:\Users\User\jb-multi-php
 npm install
 npm run build
 ```

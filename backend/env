@@ -25,8 +25,8 @@ app.adminPassword = 'admin123'
 # DATABASE
 #--------------------------------------------------------------------
 database.default.hostname = localhost
-database.default.database = jbmulti
-database.default.username = jbmulti
+database.default.database = jbmultimarcaas2_jbmulti
+database.default.username = jbmultimarcaas2_jbadmin
 database.default.password = Vodin4s@
 database.default.DBDriver = MySQLi
 database.default.DBPrefix =

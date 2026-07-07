@@ -2,8 +2,10 @@
 /**
  * Bridge do CodeIgniter 4 para rodar dentro de public_html/api/
  * O código do CI fica em /home/jbmultimarcaas2/ci/ (fora do público).
+ * Compatível com CodeIgniter 4.5+
  */
 
+// Path do FrontController (esta pasta public_html/api/)
 define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
 
 $pathsPath = realpath(FCPATH . '../../ci/app/Config/Paths.php');
@@ -18,9 +20,9 @@ if ($pathsPath === false) {
 require $pathsPath;
 
 $paths = new Config\Paths();
-require rtrim($paths->systemDirectory, '\\/ ') . DIRECTORY_SEPARATOR . 'bootstrap.php';
 
-$app = \Config\Services::codeigniter();
-$app->initialize();
-$app->setContext(is_cli() ? 'php-cli' : 'web');
-$app->run();
+// Boot padrão do CI 4.5+ — usa a classe Boot em vez do antigo system/bootstrap.php
+require realpath($paths->systemDirectory . '/Boot.php')
+    ?: $paths->systemDirectory . '/Boot.php';
+
+exit(CodeIgniter\Boot::bootWeb($paths));

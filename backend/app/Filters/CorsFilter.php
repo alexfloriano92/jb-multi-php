@@ -16,8 +16,12 @@ class CorsFilter implements FilterInterface
     {
         $response = service('response');
         $origin   = $request->getHeaderLine('Origin');
-        $allowed  = array_filter(array_map('trim',
-            explode(',', (string) config('App')->corsAllowedOrigins ?? '')));
+        $raw = config('App')->corsAllowedOrigins ?? [];
+        if (is_array($raw)) {
+            $allowed = array_filter(array_map('trim', $raw));
+        } else {
+            $allowed = array_filter(array_map('trim', explode(',', (string) $raw)));
+        }
 
         if ($origin && in_array($origin, $allowed, true)) {
             $response->setHeader('Access-Control-Allow-Origin', $origin);

@@ -49,16 +49,20 @@ class CarModel extends Model
             return $row;
         };
 
-        if (isset($data['data'])) {
-            if (! is_array($data['data']) || empty($data['data'])) {
-                return $data;
-            }
-            if (array_is_list($data['data'])) {
-                $data['data'] = array_map($decode, $data['data']);
-            } elseif ($data['method'] === 'find' || $data['method'] === 'first') {
-                $data['data'] = $decode($data['data']);
-            }
+        if (! isset($data['data']) || ! is_array($data['data']) || empty($data['data'])) {
+            return $data;
         }
+
+        // Detecta se é lista (array indexado 0..n) sem depender de array_is_list (PHP 8.1+).
+        $first = array_key_first($data['data']);
+        $isList = ($first === 0);
+
+        if ($isList) {
+            $data['data'] = array_map($decode, $data['data']);
+        } else {
+            $data['data'] = $decode($data['data']);
+        }
+
         return $data;
     }
 }

@@ -1,5 +1,6 @@
 # Reescrita para o CodeIgniter 4
 Options -Indexes
+DirectoryIndex index.php
 
 <IfModule mod_rewrite.c>
     RewriteEngine On

@@ -50,9 +50,12 @@ class CarModel extends Model
         };
 
         if (isset($data['data'])) {
-            if (isset($data['data'][0])) {
+            if (! is_array($data['data']) || empty($data['data'])) {
+                return $data;
+            }
+            if (array_is_list($data['data'])) {
                 $data['data'] = array_map($decode, $data['data']);
-            } else {
+            } elseif ($data['method'] === 'find' || $data['method'] === 'first') {
                 $data['data'] = $decode($data['data']);
             }
         }

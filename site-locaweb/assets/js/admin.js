@@ -92,6 +92,7 @@ function wireForm() {
   fi.addEventListener("change", async () => {
     const f = fi.files?.[0]; if (!f) return;
     await uploadCover(f);
+    fi.value = "";
   });
   document.getElementById("removeCover").addEventListener("click", () => {
     form.image_url = ""; renderUploader();

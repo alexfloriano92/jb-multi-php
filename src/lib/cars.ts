@@ -22,23 +22,57 @@ export type Car = {
   updated_at: string;
 };
 
-function normalize(c: any): Car {
+function safeImages(value: unknown): string[] {
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string");
+  if (typeof value !== "string" || !value.trim()) return [];
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function isCarLike(value: unknown): value is Record<string, any> {
+  return !!value && typeof value === "object" && "id" in value && "brand" in value && "model" in value;
+}
+
+function normalize(c: Record<string, any>): Car {
   return {
     ...c,
+    id: String(c.id),
+    brand: String(c.brand ?? ""),
+    model: String(c.model ?? ""),
+    category: String(c.category ?? "seminovo"),
+    color: typeof c.color === "string" ? c.color : null,
+    fuel: typeof c.fuel === "string" ? c.fuel : null,
+    transmission: typeof c.transmission === "string" ? c.transmission : null,
+    image_url: typeof c.image_url === "string" ? c.image_url : null,
+    description: typeof c.description === "string" ? c.description : null,
+    created_at: typeof c.created_at === "string" ? c.created_at : "",
+    updated_at: typeof c.updated_at === "string" ? c.updated_at : "",
     price: c.price !== null && c.price !== undefined ? Number(c.price) : null,
     year:  Number(c.year) || 0,
     km:    Number(c.km)   || 0,
     sort_order: Number(c.sort_order) || 0,
     sold:     !!c.sold,
     featured: !!c.featured,
-    images: Array.isArray(c.images) ? c.images : (c.images ? JSON.parse(c.images) : []),
+    images: safeImages(c.images),
   };
+}
+
+function normalizePayload(data: unknown): Car[] {
+  const payload = data && typeof data === "object" && "data" in data ? (data as { data: unknown }).data : data;
+  if (Array.isArray(payload)) return payload.filter(isCarLike).map(normalize);
+  if (isCarLike(payload)) return [normalize(payload)];
+  return [];
 }
 
 export async function fetchCars(): Promise<Car[]> {
   try {
-    const data = await api<any[]>("/cars", { auth: false });
-    return (data ?? []).map(normalize);
+    const data = await api<unknown>("/cars", { auth: false });
+    return normalizePayload(data);
   } catch (e) {
     // Backend PHP ainda não configurado / offline — não derruba o SSR.
     if (typeof console !== "undefined") console.warn("[cars] API indisponível:", (e as Error).message);

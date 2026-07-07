@@ -29,6 +29,7 @@ class Filters extends BaseConfig
         'secureheaders' => SecureHeaders::class,
         'cors'          => CorsFilter::class,
         'auth'          => AuthFilter::class,
+        'cors-auth'     => [CorsFilter::class, AuthFilter::class],
         'admin'         => AdminFilter::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,

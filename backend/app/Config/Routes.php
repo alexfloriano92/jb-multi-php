@@ -17,7 +17,7 @@ $routes->get('cars', 'Cars::index', ['filter' => 'cors']);
 $routes->get('cars/(:segment)', 'Cars::show/$1', ['filter' => 'cors']);
 
 // ─── Autenticado (sessão) ────────────────────────────
-$routes->group('', ['filter' => 'cors,auth'], static function ($routes) {
+$routes->group('', ['filter' => ['cors', 'auth']], static function ($routes) {
     $routes->get ('auth/me',     'Auth::me');
     $routes->post('auth/logout', 'Auth::logout');
 

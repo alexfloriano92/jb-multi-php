@@ -4,7 +4,6 @@ DirectoryIndex index.php
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /api/
 
     # Preserva Authorization header
     RewriteCond %{HTTP:Authorization} .
@@ -13,7 +12,7 @@ DirectoryIndex index.php
     # Envia tudo que não é arquivo/pasta real para index.php
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ index.php/$1 [L,QSA]
+    RewriteRule ^(.*)$ /api/index.php/$1 [L,QSA]
 </IfModule>
 
 <IfModule !mod_rewrite.c>

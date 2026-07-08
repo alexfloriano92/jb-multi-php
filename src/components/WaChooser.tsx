@@ -8,6 +8,8 @@ export default function WaChooser() {
     const onClick = (ev: MouseEvent) => {
       const target = (ev.target as HTMLElement | null)?.closest?.('a[href*="wa.me/"]') as HTMLAnchorElement | null;
       if (!target) return;
+      // Não intercepta cliques dentro do próprio modal (links dos sócios).
+      if (target.closest("[data-wa-chooser]")) return;
       ev.preventDefault();
       let text = "Olá! Vim pelo site da JB Multimarcas e gostaria de mais informações.";
       try {
@@ -30,6 +32,7 @@ export default function WaChooser() {
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        data-wa-chooser
         style={{ background: "#0b0b14", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 22, maxWidth: 400, width: "100%", color: "#fff", padding: "28px 24px", position: "relative", boxShadow: "0 40px 80px -20px rgba(0,0,0,0.7)" }}
       >
         <button

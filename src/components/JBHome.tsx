@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { carsQueryOptions, whatsappUrl, type Car } from "@/lib/cars";
+import { carsQueryOptions, whatsappUrl, whatsappUrlFor, SOCIOS, type Car } from "@/lib/cars";
 
 function fmtKm(km: number) {
   return km.toLocaleString("pt-BR");
@@ -58,6 +58,25 @@ export default function JBHome() {
   const [currentBrand, setCurrentBrand] = useState("todas");
   const [calcValor, setCalcValor] = useState("");
   const [calcEntrada, setCalcEntrada] = useState("");
+  const [waText, setWaText] = useState<string | null>(null);
+
+  // Intercepta todos os cliques em links do WhatsApp e abre o seletor Bruno/Júnior
+  useEffect(() => {
+    const onClick = (ev: MouseEvent) => {
+      const target = (ev.target as HTMLElement | null)?.closest?.('a[href*="wa.me/"]') as HTMLAnchorElement | null;
+      if (!target) return;
+      ev.preventDefault();
+      let text = "Olá! Vim pelo site da JB Multimarcas e gostaria de mais informações.";
+      try {
+        const u = new URL(target.href);
+        const t = u.searchParams.get("text");
+        if (t) text = t;
+      } catch { /* ignore */ }
+      setWaText(text);
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
   const [calcParcelas, setCalcParcelas] = useState<string | number>(60);
   const [calcResult, setCalcResult] = useState("R$ --");
   const [calcNote, setCalcNote] = useState("Preencha os campos acima para simular");
@@ -223,7 +242,7 @@ export default function JBHome() {
     if (formData.email) text += ` E-mail: ${formData.email}.`;
     if (formData.interesse) text += ` Tenho interesse em: ${formData.interesse}.`;
     if (formData.mensagem) text += ` Mensagem: ${formData.mensagem}`;
-    window.open(whatsappUrl(text), "_blank");
+    setWaText(text);
   };
 
   const highlightText = (text: string, query: string) => {

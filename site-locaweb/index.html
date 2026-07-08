@@ -21,7 +21,7 @@
 
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
-<body>
+<body data-page="home">
   <div class="jb-app">
     <!-- NAVBAR -->
     <nav id="navbar">
@@ -99,46 +99,19 @@
       </div>
     </div>
 
-    <!-- CATÁLOGO -->
+    <!-- CATÁLOGO (Home: 6 destaques) -->
     <section id="catalogo">
       <div class="section-header fade-in-up">
-        <div class="section-tag"><i class="fas fa-car"></i> Estoque</div>
-        <h2 class="section-title">Nosso <span class="gold">Catálogo</span></h2>
-        <p class="section-subtitle">Veículos selecionados com procedência garantida. 0KM e seminovos esperando por você.</p>
-      </div>
-
-      <div class="catalog-search-wrapper fade-in-up">
-        <div class="catalog-search-box">
-          <span class="catalog-search-icon"><i class="fas fa-search"></i></span>
-          <input id="searchInput" type="text" placeholder="Buscar por marca ou modelo... ex: Toyota, Onix, Hilux" autocomplete="off" />
-          <button id="searchClear" class="catalog-search-clear" style="display:none" title="Limpar busca" aria-label="Limpar busca">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div id="suggestions" class="catalog-suggestions"></div>
-      </div>
-
-      <div id="brandPills" class="catalog-brand-pills fade-in-up"></div>
-
-      <div id="resultInfo" class="catalog-result-info">
-        <i class="fas fa-filter"></i>
-        <span id="resultInfoText"></span>
-        <button id="resultClear" class="result-clear-btn">Limpar filtro</button>
-      </div>
-
-      <div class="catalog-filters fade-in-up">
-        <button class="filter-btn active" data-cat="todos">Todos</button>
-        <button class="filter-btn" data-cat="novo">0KM / Novos</button>
-        <button class="filter-btn" data-cat="seminovo">Seminovos</button>
-        <button class="filter-btn" data-cat="suv">SUVs</button>
-        <button class="filter-btn" data-cat="pickup">Pickups</button>
+        <div class="section-tag"><i class="fas fa-star"></i> Destaques</div>
+        <h2 class="section-title">Nossos <span class="gold">Destaques</span></h2>
+        <p class="section-subtitle">Uma seleção dos nossos melhores veículos. Veja o catálogo completo com filtros e busca.</p>
       </div>
 
       <div id="vehiclesGrid" class="vehicles-grid">
         <div id="noResults" class="catalog-no-results">
           <div class="no-results-icon"><i class="fas fa-car-side"></i></div>
           <div class="no-results-title">Nenhum veículo encontrado</div>
-          <p class="no-results-text">Não encontramos veículos com esse nome.<br />Tente buscar por outra marca ou modelo.</p>
+          <p class="no-results-text">Ainda não há veículos em destaque.<br />Veja o catálogo completo.</p>
           <a id="noResultsWhats" href="#" target="_blank" rel="noreferrer" class="btn-primary" style="display:inline-flex">
             <i class="fab fa-whatsapp"></i> Perguntar pelo WhatsApp
           </a>
@@ -146,9 +119,9 @@
       </div>
 
       <div class="catalog-cta-wrapper fade-in-up">
-        <button id="catalogShowAll" type="button" class="btn-primary">
+        <a href="veiculos.html" class="btn-primary" style="display:inline-flex">
           <i class="fas fa-car-side"></i> Ver todos os veículos
-        </button>
+        </a>
       </div>
     </section>
 

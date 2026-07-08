@@ -252,19 +252,21 @@
             <div class="contact-icon"><i class="fas fa-clock"></i></div>
             <div class="contact-info-text">
               <strong>Horário de Funcionamento</strong>
+              <div id="openStatus" class="open-status" aria-live="polite"></div>
               <div class="horario-grid">
-                <div class="horario-item"><span class="day">Segunda</span><span class="time">07:30 – 18:00</span></div>
-                <div class="horario-item"><span class="day">Terça</span><span class="time">07:30 – 17:00</span></div>
-                <div class="horario-item"><span class="day">Quarta</span><span class="time">07:30 – 17:00</span></div>
-                <div class="horario-item"><span class="day">Quinta</span><span class="time">07:30 – 17:00</span></div>
-                <div class="horario-item"><span class="day">Sexta</span><span class="time">07:30 – 17:00</span></div>
-                <div class="horario-item"><span class="day">Sábado</span><span class="time">08:00 – 12:00</span></div>
-                <div class="horario-item closed"><span class="day">Domingo</span><span class="time">Fechado</span></div>
+                <div class="horario-item" data-day="1"><span class="day">Segunda</span><span class="time">07:30 – 18:00</span></div>
+                <div class="horario-item" data-day="2"><span class="day">Terça</span><span class="time">07:30 – 17:00</span></div>
+                <div class="horario-item" data-day="3"><span class="day">Quarta</span><span class="time">07:30 – 17:00</span></div>
+                <div class="horario-item" data-day="4"><span class="day">Quinta</span><span class="time">07:30 – 17:00</span></div>
+                <div class="horario-item" data-day="5"><span class="day">Sexta</span><span class="time">07:30 – 17:00</span></div>
+                <div class="horario-item" data-day="6"><span class="day">Sábado</span><span class="time">08:00 – 12:00</span></div>
+                <div class="horario-item closed" data-day="0"><span class="day">Domingo</span><span class="time">Fechado</span></div>
               </div>
             </div>
           </div>
           <div class="map-wrapper">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3752.0!2d-45.764!3d-22.351!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjLCsDIxJzAzLjYiUyA0NcKwNDUnNTAuNCJX!5e0!3m2!1spt-BR!2sbr!4v1234567890" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Localização JB Multimarcas"></iframe>
+            <iframe src="https://www.google.com/maps?q=JB+Multimarcas+Cachoeira+de+Minas+MG&hl=pt-BR&z=15&output=embed" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Localização JB Multimarcas"></iframe>
+            <a class="map-open" href="https://www.google.com/maps/search/?api=1&query=JB+Multimarcas+Cachoeira+de+Minas+MG" target="_blank" rel="noreferrer"><i class="fas fa-external-link-alt"></i> Abrir no Google Maps</a>
           </div>
         </div>
         <div class="contact-form-card fade-in-up">

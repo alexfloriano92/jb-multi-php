@@ -580,25 +580,46 @@ export default function JBHome() {
               <div className="contact-icon"><i className="fas fa-clock"></i></div>
               <div className="contact-info-text">
                 <strong>Horário de Funcionamento</strong>
+                <div className={`open-status ${openStatus.open ? "is-open" : "is-closed"}`} aria-live="polite">
+                  {openStatus.text}
+                </div>
                 <div className="horario-grid">
-                  <div className="horario-item"><span className="day">Segunda</span><span className="time">07:30 – 18:00</span></div>
-                  <div className="horario-item"><span className="day">Terça</span><span className="time">07:30 – 17:00</span></div>
-                  <div className="horario-item"><span className="day">Quarta</span><span className="time">07:30 – 17:00</span></div>
-                  <div className="horario-item"><span className="day">Quinta</span><span className="time">07:30 – 17:00</span></div>
-                  <div className="horario-item"><span className="day">Sexta</span><span className="time">07:30 – 17:00</span></div>
-                  <div className="horario-item"><span className="day">Sábado</span><span className="time">08:00 – 12:00</span></div>
-                  <div className="horario-item closed"><span className="day">Domingo</span><span className="time">Fechado</span></div>
+                  {[
+                    { d: 1, name: "Segunda", time: "07:30 – 18:00" },
+                    { d: 2, name: "Terça", time: "07:30 – 17:00" },
+                    { d: 3, name: "Quarta", time: "07:30 – 17:00" },
+                    { d: 4, name: "Quinta", time: "07:30 – 17:00" },
+                    { d: 5, name: "Sexta", time: "07:30 – 17:00" },
+                    { d: 6, name: "Sábado", time: "08:00 – 12:00" },
+                    { d: 0, name: "Domingo", time: "Fechado", closed: true },
+                  ].map((h) => (
+                    <div
+                      key={h.d}
+                      className={`horario-item${h.closed ? " closed" : ""}${openStatus.day === h.d ? " today" : ""}`}
+                    >
+                      <span className="day">{h.name}</span>
+                      <span className="time">{h.time}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
             <div className="map-wrapper">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3752.0!2d-45.764!3d-22.351!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjLCsDIxJzAzLjYiUyA0NcKwNDUnNTAuNCJX!5e0!3m2!1spt-BR!2sbr!4v1234567890"
+                src="https://www.google.com/maps?q=JB+Multimarcas+Cachoeira+de+Minas+MG&hl=pt-BR&z=15&output=embed"
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 title="Localização JB Multimarcas"
               ></iframe>
+              <a
+                className="map-open"
+                href="https://www.google.com/maps/search/?api=1&query=JB+Multimarcas+Cachoeira+de+Minas+MG"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <i className="fas fa-external-link-alt"></i> Abrir no Google Maps
+              </a>
             </div>
           </div>
           <div className="contact-form-card fade-in-up">

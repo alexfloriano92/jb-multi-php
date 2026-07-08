@@ -112,6 +112,17 @@ export function categoryLabel(c: string): string {
   return c;
 }
 
+export const SOCIOS = [
+  { nome: "Júnior", fone: "5535999091119", inicial: "J", cor: "linear-gradient(135deg,#f4b942,#e8932a)" },
+  { nome: "Bruno",  fone: "5535998854358", inicial: "B", cor: "linear-gradient(135deg,#7eb3ff,#5090e0)" },
+] as const;
+
+// Mantém href válido como fallback (Júnior). Todos os cliques em `a[href*="wa.me/"]`
+// são interceptados pelo modal seletor de sócio.
 export function whatsappUrl(text: string): string {
-  return `https://wa.me/5535999091119?text=${encodeURIComponent(text)}`;
+  return `https://wa.me/${SOCIOS[0].fone}?text=${encodeURIComponent(text)}`;
+}
+
+export function whatsappUrlFor(fone: string, text: string): string {
+  return `https://wa.me/${fone}?text=${encodeURIComponent(text)}`;
 }

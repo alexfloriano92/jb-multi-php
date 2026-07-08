@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { carsQueryOptions, whatsappUrl, type Car } from "@/lib/cars";
+import { carsQueryOptions, whatsappUrl, whatsappUrlFor, SOCIOS, type Car } from "@/lib/cars";
 
 function fmtKm(km: number) {
   return km.toLocaleString("pt-BR");
@@ -58,6 +58,25 @@ export default function JBHome() {
   const [currentBrand, setCurrentBrand] = useState("todas");
   const [calcValor, setCalcValor] = useState("");
   const [calcEntrada, setCalcEntrada] = useState("");
+  const [waText, setWaText] = useState<string | null>(null);
+
+  // Intercepta todos os cliques em links do WhatsApp e abre o seletor Bruno/Júnior
+  useEffect(() => {
+    const onClick = (ev: MouseEvent) => {
+      const target = (ev.target as HTMLElement | null)?.closest?.('a[href*="wa.me/"]') as HTMLAnchorElement | null;
+      if (!target) return;
+      ev.preventDefault();
+      let text = "Olá! Vim pelo site da JB Multimarcas e gostaria de mais informações.";
+      try {
+        const u = new URL(target.href);
+        const t = u.searchParams.get("text");
+        if (t) text = t;
+      } catch { /* ignore */ }
+      setWaText(text);
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
   const [calcParcelas, setCalcParcelas] = useState<string | number>(60);
   const [calcResult, setCalcResult] = useState("R$ --");
   const [calcNote, setCalcNote] = useState("Preencha os campos acima para simular");
@@ -223,7 +242,7 @@ export default function JBHome() {
     if (formData.email) text += ` E-mail: ${formData.email}.`;
     if (formData.interesse) text += ` Tenho interesse em: ${formData.interesse}.`;
     if (formData.mensagem) text += ` Mensagem: ${formData.mensagem}`;
-    window.open(whatsappUrl(text), "_blank");
+    setWaText(text);
   };
 
   const highlightText = (text: string, query: string) => {
@@ -877,6 +896,62 @@ export default function JBHome() {
           </div>
         );
       })()}
+
+      {waText !== null && (
+        <div
+          onClick={() => setWaText(null)}
+          style={{ position: "fixed", inset: 0, background: "rgba(4,4,10,0.88)", backdropFilter: "blur(10px)", zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 16px", fontFamily: "Inter, sans-serif" }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ background: "#0b0b14", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 22, maxWidth: 400, width: "100%", color: "#fff", padding: "28px 24px", position: "relative", boxShadow: "0 40px 80px -20px rgba(0,0,0,0.7)" }}
+          >
+            <button
+              onClick={() => setWaText(null)}
+              aria-label="Fechar"
+              style={{ position: "absolute", top: 12, right: 12, width: 34, height: 34, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.55)", color: "#fff", cursor: "pointer", fontSize: 16 }}
+            >×</button>
+            <div style={{ textAlign: "center", marginBottom: 20 }}>
+              <div style={{ color: "#25D366", fontSize: 34, marginBottom: 8 }}>
+                <i className="fab fa-whatsapp"></i>
+              </div>
+              <h3 style={{ fontFamily: "Outfit, sans-serif", fontSize: 22, fontWeight: 700, margin: "0 0 6px" }}>
+                Fale com a JB Multimarcas
+              </h3>
+              <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, margin: 0 }}>
+                Escolha com qual sócio você quer conversar:
+              </p>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {SOCIOS.map((s) => (
+                <a
+                  key={s.fone}
+                  href={whatsappUrlFor(s.fone, waText)}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setTimeout(() => setWaText(null), 100)}
+                  style={{ display: "flex", alignItems: "center", gap: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "14px 16px", textDecoration: "none", color: "#fff", transition: "background .2s, border-color .2s" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(37,211,102,0.08)"; e.currentTarget.style.borderColor = "rgba(37,211,102,0.4)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}
+                >
+                  <div style={{ width: 44, height: 44, borderRadius: "50%", background: s.cor, color: "#0a0a0a", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Outfit, sans-serif", fontWeight: 800, fontSize: 18 }}>
+                    {s.inicial}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontFamily: "Outfit, sans-serif", fontWeight: 700, fontSize: 15 }}>Falar com {s.nome}</div>
+                    <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, marginTop: 2 }}>
+                      ({s.fone.slice(2, 4)}) {s.fone.slice(4, 9)}-{s.fone.slice(9)}
+                    </div>
+                  </div>
+                  <div style={{ color: "#25D366", fontSize: 22 }}>
+                    <i className="fab fa-whatsapp"></i>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

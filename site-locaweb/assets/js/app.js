@@ -4,7 +4,11 @@
 // ================================================================
 
 const API = "/api";
-const WHATS = "5535999091119";
+const SOCIOS = [
+  { nome: "Júnior", fone: "5535999091119", inicial: "J", cor: "linear-gradient(135deg,#f4b942,#e8932a)" },
+  { nome: "Bruno",  fone: "5535998854358", inicial: "B", cor: "linear-gradient(135deg,#7eb3ff,#5090e0)" },
+];
+const WHATS = SOCIOS[0].fone; // fallback (href válido)
 const wa = (t) => `https://wa.me/${WHATS}?text=${encodeURIComponent(t)}`;
 const fmtKm = (n) => (n || 0).toLocaleString("pt-BR");
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -27,6 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   wireFilters();
   wireSearch();
   wireOpenStatus();
+  wireWhatsChooser();
 
   try {
     const res = await fetch(`${API}/cars`);
@@ -282,8 +287,67 @@ function wireContactForm() {
     if (email) t += ` E-mail: ${email}.`;
     if (interesse) t += ` Tenho interesse em: ${interesse}.`;
     if (msg) t += ` Mensagem: ${msg}`;
-    window.open(wa(t), "_blank");
+    openWaChooser(t);
   });
+}
+
+// ---------- Seletor de sócio (WhatsApp Bruno / Júnior) ----------
+function wireWhatsChooser() {
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest && e.target.closest('a[href*="wa.me/"]');
+    if (!a) return;
+    e.preventDefault();
+    let text = "Olá! Vim pelo site da JB Multimarcas e gostaria de mais informações.";
+    try {
+      const u = new URL(a.href);
+      const t = u.searchParams.get("text");
+      if (t) text = t;
+    } catch (_) {}
+    openWaChooser(text);
+  });
+}
+
+function openWaChooser(text) {
+  // Remove modal anterior se existir
+  const prev = document.getElementById("waChooserModal");
+  if (prev) prev.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "waChooserModal";
+  modal.style.cssText = "position:fixed;inset:0;background:rgba(4,4,10,.88);backdrop-filter:blur(10px);z-index:10000;display:flex;align-items:center;justify-content:center;padding:24px 16px;font-family:Inter,sans-serif";
+  const socios = SOCIOS.map((s) => `
+    <a href="https://wa.me/${s.fone}?text=${encodeURIComponent(text)}" target="_blank" rel="noreferrer"
+       class="wa-choice"
+       style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;text-decoration:none;color:#fff;transition:background .2s,border-color .2s">
+      <div style="width:44px;height:44px;border-radius:50%;background:${s.cor};color:#0a0a0a;display:flex;align-items:center;justify-content:center;font-family:Outfit,sans-serif;font-weight:800;font-size:18px">${s.inicial}</div>
+      <div style="flex:1">
+        <div style="font-family:Outfit,sans-serif;font-weight:700;font-size:15px">Falar com ${s.nome}</div>
+        <div style="color:rgba(255,255,255,.5);font-size:12px;margin-top:2px">(${s.fone.slice(2,4)}) ${s.fone.slice(4,9)}-${s.fone.slice(9)}</div>
+      </div>
+      <div style="color:#25D366;font-size:22px"><i class="fab fa-whatsapp"></i></div>
+    </a>
+  `).join("");
+  modal.innerHTML = `
+    <div class="wa-card" style="background:#0b0b14;border:1px solid rgba(255,255,255,.08);border-radius:22px;max-width:400px;width:100%;color:#fff;padding:28px 24px;position:relative;box-shadow:0 40px 80px -20px rgba(0,0,0,.7)">
+      <button class="wa-close" aria-label="Fechar" style="position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.55);color:#fff;cursor:pointer;font-size:16px">×</button>
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="color:#25D366;font-size:34px;margin-bottom:8px"><i class="fab fa-whatsapp"></i></div>
+        <h3 style="font-family:Outfit,sans-serif;font-size:22px;font-weight:700;margin:0 0 6px">Fale com a JB Multimarcas</h3>
+        <p style="color:rgba(255,255,255,.6);font-size:13px;margin:0">Escolha com qual sócio você quer conversar:</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">${socios}</div>
+    </div>
+  `;
+  const close = () => { modal.remove(); document.body.style.overflow = ""; };
+  modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
+  modal.querySelector(".wa-close").addEventListener("click", close);
+  modal.querySelectorAll(".wa-choice").forEach((el) => {
+    el.addEventListener("mouseenter", () => { el.style.background = "rgba(37,211,102,.08)"; el.style.borderColor = "rgba(37,211,102,.4)"; });
+    el.addEventListener("mouseleave", () => { el.style.background = "rgba(255,255,255,.04)"; el.style.borderColor = "rgba(255,255,255,.08)"; });
+    el.addEventListener("click", () => setTimeout(close, 100));
+  });
+  document.body.style.overflow = "hidden";
+  document.body.appendChild(modal);
 }
 
 // ---------- Modal do carro ----------

@@ -311,6 +311,8 @@ function wireWhatsChooser() {
   document.addEventListener("click", (e) => {
     const a = e.target.closest && e.target.closest('a[href*="wa.me/"]');
     if (!a) return;
+    // Não intercepta cliques dentro do próprio modal (links dos sócios).
+    if (a.closest("#waChooserModal")) return;
     e.preventDefault();
     let text = "Olá! Vim pelo site da JB Multimarcas e gostaria de mais informações.";
     try {

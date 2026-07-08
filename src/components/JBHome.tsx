@@ -481,9 +481,21 @@ export default function JBHome() {
         </div>
 
         <div className="catalog-cta-wrapper fade-in-up">
-          <a href={whatsappUrl("Olá! Gostaria de ver todos os veículos disponíveis.")} target="_blank" rel="noreferrer" className="btn-primary">
-            <i className="fab fa-whatsapp"></i> Ver Todo o Estoque no WhatsApp
-          </a>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => {
+              setSearchVal("");
+              setSuggestions([]);
+              setShowSuggestions(false);
+              setCurrentBrand("todas");
+              setCurrentCategory("todos");
+              applyFilters("", "todas", "todos");
+              document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+          >
+            <i className="fas fa-car-side"></i> Ver todos os veículos
+          </button>
         </div>
       </section>
 

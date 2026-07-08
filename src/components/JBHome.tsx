@@ -597,7 +597,8 @@ export default function JBHome() {
               <div className="contact-icon"><i className="fas fa-phone-alt"></i></div>
               <div className="contact-info-text">
                 <strong>Telefone / WhatsApp</strong>
-                <a href="https://wa.me/5535999091119" target="_blank" rel="noreferrer">(35) 99909-1119</a>
+                <a href="https://wa.me/5535999091119" target="_blank" rel="noreferrer">Júnior: (35) 99909-1119</a>
+                <a href="https://wa.me/5535998854358" target="_blank" rel="noreferrer">Bruno: (35) 99885-4358</a>
               </div>
             </div>
             <div className="contact-item">
@@ -729,7 +730,8 @@ export default function JBHome() {
             <ul className="footer-links">
               <li>Av. Perimetral João Dionísio Filho, 638</li>
               <li>Cachoeira de Minas - MG</li>
-              <li>(35) 99909-1119</li>
+              <li>Júnior: (35) 99909-1119</li>
+              <li>Bruno: (35) 99885-4358</li>
               <li>@jb.multimarcaas</li>
             </ul>
           </div>

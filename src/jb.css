@@ -1862,6 +1862,27 @@ footer {
     padding: 70px 5%;
   }
 
+  #hero {
+    min-height: 560px;
+    height: auto;
+    padding: 120px 0 80px;
+  }
+
+  .hero-bg {
+    background-position: 50% 65%;
+    background-size: cover;
+    filter: brightness(0.55) contrast(1.05);
+    animation: none;
+    transform: none;
+  }
+
+  .hero-overlay {
+    background: linear-gradient(180deg,
+        rgba(8, 8, 16, 0.55) 0%,
+        rgba(8, 8, 16, 0.35) 45%,
+        rgba(8, 8, 16, 0.85) 100%);
+  }
+
   .nav-links {
     display: none;
   }

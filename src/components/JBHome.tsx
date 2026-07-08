@@ -12,6 +12,40 @@ function badgeFor(cat: string) {
     : { cls: "badge-seminovo", label: "Seminovo" };
 }
 
+const SCHEDULE: Record<number, [number, number] | null> = {
+  0: null,
+  1: [7 * 60 + 30, 18 * 60],
+  2: [7 * 60 + 30, 17 * 60],
+  3: [7 * 60 + 30, 17 * 60],
+  4: [7 * 60 + 30, 17 * 60],
+  5: [7 * 60 + 30, 17 * 60],
+  6: [8 * 60, 12 * 60],
+};
+const DAY_NAMES = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
+function fmtMin(m: number) {
+  return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+}
+function computeOpenStatus(now: Date) {
+  const day = now.getDay();
+  const min = now.getHours() * 60 + now.getMinutes();
+  const s = SCHEDULE[day];
+  if (s && min >= s[0] && min < s[1]) {
+    return { day, open: true as const, text: `Aberto agora · fecha às ${fmtMin(s[1])}` };
+  }
+  for (let i = 0; i < 8; i++) {
+    const d = (day + i) % 7;
+    const sc = SCHEDULE[d];
+    if (!sc) continue;
+    if (i === 0 && min < sc[0]) {
+      return { day, open: false as const, text: `Fechado agora · abre hoje às ${fmtMin(sc[0])}` };
+    }
+    if (i > 0) {
+      return { day, open: false as const, text: `Fechado agora · abre ${DAY_NAMES[d]} às ${fmtMin(sc[0])}` };
+    }
+  }
+  return { day, open: false as const, text: "Fechado" };
+}
+
 export default function JBHome() {
   const { data: cars } = useSuspenseQuery(carsQueryOptions);
 
@@ -33,6 +67,14 @@ export default function JBHome() {
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [galleryIdx, setGalleryIdx] = useState(0);
   const blurTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [openStatus, setOpenStatus] = useState(() => computeOpenStatus(new Date()));
+  useEffect(() => {
+    const tick = () => setOpenStatus(computeOpenStatus(new Date()));
+    tick();
+    const id = setInterval(tick, 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);

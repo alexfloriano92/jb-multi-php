@@ -1,15 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { carsQueryOptions, whatsappUrl, whatsappUrlFor, SOCIOS, type Car } from "@/lib/cars";
+import { carsQueryOptions, whatsappUrl } from "@/lib/cars";
+import VehiclesCatalog from "@/components/VehiclesCatalog";
+import WaChooser from "@/components/WaChooser";
 
 function fmtKm(km: number) {
   return km.toLocaleString("pt-BR");
-}
-function badgeFor(cat: string) {
-  return cat.includes("novo") && !cat.includes("seminovo")
-    ? { cls: "badge-novo", label: "0KM" }
-    : { cls: "badge-seminovo", label: "Seminovo" };
 }
 
 const SCHEDULE: Record<number, [number, number] | null> = {
@@ -45,49 +42,21 @@ function computeOpenStatus(now: Date) {
   }
   return { day, open: false as const, text: "Fechado" };
 }
+const INITIAL_STATUS = { day: -1, open: false as const, text: "" };
 
 export default function JBHome() {
   const { data: cars } = useSuspenseQuery(carsQueryOptions);
 
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [searchVal, setSearchVal] = useState("");
-  const [suggestions, setSuggestions] = useState<Car[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [currentCategory, setCurrentCategory] = useState("todos");
-  const [currentBrand, setCurrentBrand] = useState("todas");
   const [calcValor, setCalcValor] = useState("");
   const [calcEntrada, setCalcEntrada] = useState("");
-  const [waText, setWaText] = useState<string | null>(null);
-
-  // Intercepta todos os cliques em links do WhatsApp e abre o seletor Bruno/Júnior
-  useEffect(() => {
-    const onClick = (ev: MouseEvent) => {
-      const target = (ev.target as HTMLElement | null)?.closest?.('a[href*="wa.me/"]') as HTMLAnchorElement | null;
-      if (!target) return;
-      ev.preventDefault();
-      let text = "Olá! Vim pelo site da JB Multimarcas e gostaria de mais informações.";
-      try {
-        const u = new URL(target.href);
-        const t = u.searchParams.get("text");
-        if (t) text = t;
-      } catch { /* ignore */ }
-      setWaText(text);
-    };
-    document.addEventListener("click", onClick);
-    return () => document.removeEventListener("click", onClick);
-  }, []);
   const [calcParcelas, setCalcParcelas] = useState<string | number>(60);
   const [calcResult, setCalcResult] = useState("R$ --");
   const [calcNote, setCalcNote] = useState("Preencha os campos acima para simular");
   const [formData, setFormData] = useState({ nome: "", telefone: "", email: "", interesse: "", mensagem: "" });
-  const [resultInfo, setResultInfo] = useState<{ visible: boolean; text: string }>({ visible: false, text: "" });
-  const [noResults, setNoResults] = useState(false);
-  const [selectedCar, setSelectedCar] = useState<Car | null>(null);
-  const [galleryIdx, setGalleryIdx] = useState(0);
-  const blurTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [openStatus, setOpenStatus] = useState(() => computeOpenStatus(new Date()));
+  const [openStatus, setOpenStatus] = useState<ReturnType<typeof computeOpenStatus> | typeof INITIAL_STATUS>(INITIAL_STATUS);
   useEffect(() => {
     const tick = () => setOpenStatus(computeOpenStatus(new Date()));
     tick();

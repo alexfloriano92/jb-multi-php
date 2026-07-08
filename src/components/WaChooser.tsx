@@ -32,6 +32,7 @@ export default function WaChooser() {
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        data-wa-chooser
         style={{ background: "#0b0b14", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 22, maxWidth: 400, width: "100%", color: "#fff", padding: "28px 24px", position: "relative", boxShadow: "0 40px 80px -20px rgba(0,0,0,0.7)" }}
       >
         <button

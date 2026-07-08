@@ -1,15 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { carsQueryOptions, whatsappUrl, whatsappUrlFor, SOCIOS, type Car } from "@/lib/cars";
+import { carsQueryOptions, whatsappUrl } from "@/lib/cars";
+import VehiclesCatalog from "@/components/VehiclesCatalog";
+import WaChooser from "@/components/WaChooser";
 
 function fmtKm(km: number) {
   return km.toLocaleString("pt-BR");
-}
-function badgeFor(cat: string) {
-  return cat.includes("novo") && !cat.includes("seminovo")
-    ? { cls: "badge-novo", label: "0KM" }
-    : { cls: "badge-seminovo", label: "Seminovo" };
 }
 
 const SCHEDULE: Record<number, [number, number] | null> = {
@@ -45,49 +42,21 @@ function computeOpenStatus(now: Date) {
   }
   return { day, open: false as const, text: "Fechado" };
 }
+const INITIAL_STATUS = { day: -1, open: false as const, text: "" };
 
 export default function JBHome() {
   const { data: cars } = useSuspenseQuery(carsQueryOptions);
 
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [searchVal, setSearchVal] = useState("");
-  const [suggestions, setSuggestions] = useState<Car[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [currentCategory, setCurrentCategory] = useState("todos");
-  const [currentBrand, setCurrentBrand] = useState("todas");
   const [calcValor, setCalcValor] = useState("");
   const [calcEntrada, setCalcEntrada] = useState("");
-  const [waText, setWaText] = useState<string | null>(null);
-
-  // Intercepta todos os cliques em links do WhatsApp e abre o seletor Bruno/Júnior
-  useEffect(() => {
-    const onClick = (ev: MouseEvent) => {
-      const target = (ev.target as HTMLElement | null)?.closest?.('a[href*="wa.me/"]') as HTMLAnchorElement | null;
-      if (!target) return;
-      ev.preventDefault();
-      let text = "Olá! Vim pelo site da JB Multimarcas e gostaria de mais informações.";
-      try {
-        const u = new URL(target.href);
-        const t = u.searchParams.get("text");
-        if (t) text = t;
-      } catch { /* ignore */ }
-      setWaText(text);
-    };
-    document.addEventListener("click", onClick);
-    return () => document.removeEventListener("click", onClick);
-  }, []);
   const [calcParcelas, setCalcParcelas] = useState<string | number>(60);
   const [calcResult, setCalcResult] = useState("R$ --");
   const [calcNote, setCalcNote] = useState("Preencha os campos acima para simular");
   const [formData, setFormData] = useState({ nome: "", telefone: "", email: "", interesse: "", mensagem: "" });
-  const [resultInfo, setResultInfo] = useState<{ visible: boolean; text: string }>({ visible: false, text: "" });
-  const [noResults, setNoResults] = useState(false);
-  const [selectedCar, setSelectedCar] = useState<Car | null>(null);
-  const [galleryIdx, setGalleryIdx] = useState(0);
-  const blurTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [openStatus, setOpenStatus] = useState(() => computeOpenStatus(new Date()));
+  const [openStatus, setOpenStatus] = useState<ReturnType<typeof computeOpenStatus> | typeof INITIAL_STATUS>(INITIAL_STATUS);
   useEffect(() => {
     const tick = () => setOpenStatus(computeOpenStatus(new Date()));
     tick();
@@ -106,24 +75,6 @@ export default function JBHome() {
   }, [menuOpen]);
 
   useEffect(() => {
-    if (selectedCar) {
-      document.body.style.overflow = "hidden";
-      setGalleryIdx(0);
-    } else if (!menuOpen) {
-      document.body.style.overflow = "";
-    }
-  }, [selectedCar, menuOpen]);
-
-  function openCar(c: Car) {
-    setSelectedCar(c);
-  }
-
-  function carGallery(c: Car): string[] {
-    const list = [c.image_url, ...((c.images || []) as string[])].filter(Boolean) as string[];
-    return list.length ? list : [];
-  }
-
-  useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -138,87 +89,6 @@ export default function JBHome() {
     document.querySelectorAll(".fade-in-up").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, [cars.length]);
-
-  const applyFilters = (search = searchVal, brand = currentBrand, category = currentCategory) => {
-    const nodes = document.querySelectorAll<HTMLElement>(".vehicle-card");
-    let visibleCount = 0;
-    nodes.forEach((card) => {
-      const cardBrand = (card.dataset.brand || "").toLowerCase();
-      const cardModel = (card.dataset.model || "").toLowerCase();
-      const cats = (card.dataset.category || "").split(" ");
-      const q = search.trim().toLowerCase();
-      const matchSearch = !q || cardBrand.includes(q) || cardModel.includes(q) || (cardBrand + " " + cardModel).includes(q);
-      const matchBrand = brand === "todas" || cardBrand === brand;
-      const matchCategory = category === "todos" || cats.includes(category);
-      const show = matchSearch && matchBrand && matchCategory;
-      if (show) {
-        visibleCount++;
-        card.style.opacity = "1";
-        card.style.transform = "";
-        card.style.display = "";
-      } else {
-        card.style.opacity = "0";
-        card.style.transform = "scale(0.95)";
-        setTimeout(() => {
-          card.style.display = "none";
-        }, 300);
-      }
-    });
-    const q = search.trim().toLowerCase();
-    if (q || brand !== "todas") {
-      const label = q ? `"${q}"` : `Marca: ${brand.charAt(0).toUpperCase() + brand.slice(1)}`;
-      setResultInfo({
-        visible: true,
-        text: `<strong>${visibleCount}</strong> veículo${visibleCount !== 1 ? "s" : ""} encontrado${visibleCount !== 1 ? "s" : ""} para ${label}`,
-      });
-      setNoResults(visibleCount === 0);
-    } else {
-      setResultInfo({ visible: false, text: "" });
-      setNoResults(false);
-    }
-  };
-
-  const handleSearchInput = (val: string) => {
-    setSearchVal(val);
-    const q = val.trim().toLowerCase();
-    if (!q) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-    } else {
-      const matches = cars.filter(
-        (v) => v.brand.toLowerCase().includes(q) || v.model.toLowerCase().includes(q)
-      );
-      setSuggestions(matches);
-      setShowSuggestions(matches.length > 0);
-    }
-    applyFilters(val, currentBrand, currentCategory);
-  };
-
-  const clearSearch = () => {
-    setSearchVal("");
-    setSuggestions([]);
-    setShowSuggestions(false);
-    applyFilters("", currentBrand, currentCategory);
-  };
-
-  const selectSuggestion = (text: string) => {
-    setSearchVal(text);
-    setShowSuggestions(false);
-    applyFilters(text, currentBrand, currentCategory);
-  };
-
-  const filterByBrand = (brand: string) => {
-    setCurrentBrand(brand);
-    setSearchVal("");
-    setSuggestions([]);
-    setShowSuggestions(false);
-    applyFilters("", brand, currentCategory);
-  };
-
-  const filterVehicles = (cat: string) => {
-    setCurrentCategory(cat);
-    applyFilters(searchVal, currentBrand, cat);
-  };
 
   useEffect(() => {
     const valor = parseFloat(calcValor) || 0;
@@ -242,20 +112,14 @@ export default function JBHome() {
     if (formData.email) text += ` E-mail: ${formData.email}.`;
     if (formData.interesse) text += ` Tenho interesse em: ${formData.interesse}.`;
     if (formData.mensagem) text += ` Mensagem: ${formData.mensagem}`;
-    setWaText(text);
-  };
-
-  const highlightText = (text: string, query: string) => {
-    if (!query) return text;
-    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const parts = text.split(new RegExp(`(${escaped})`, "gi"));
-    return parts.map((part, i) =>
-      part.toLowerCase() === query.toLowerCase() ? (
-        <em key={i} style={{ color: "var(--gold)", fontStyle: "normal" }}>{part}</em>
-      ) : (
-        part
-      )
-    );
+    // Abre o mesmo modal seletor do WhatsApp via um link temporário.
+    const a = document.createElement("a");
+    a.href = `https://wa.me/5535999091119?text=${encodeURIComponent(text)}`;
+    a.target = "_blank";
+    a.rel = "noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   };
 
   return (
@@ -351,152 +215,7 @@ export default function JBHome() {
           <p className="section-subtitle">Veículos selecionados com procedência garantida. 0KM e seminovos esperando por você.</p>
         </div>
 
-        <div className="catalog-search-wrapper fade-in-up">
-          <div className="catalog-search-box">
-            <span className="catalog-search-icon"><i className="fas fa-search"></i></span>
-            <input
-              type="text"
-              placeholder="Buscar por marca ou modelo... ex: Toyota, Onix, Hilux"
-              autoComplete="off"
-              value={searchVal}
-              onChange={(e) => handleSearchInput(e.target.value)}
-              onFocus={() => { if (searchVal.length > 0) setShowSuggestions(suggestions.length > 0); }}
-              onBlur={() => { blurTimeout.current = setTimeout(() => setShowSuggestions(false), 180); }}
-            />
-            <button className="catalog-search-clear" onClick={clearSearch} style={{ display: searchVal ? "block" : "none" }} title="Limpar busca" aria-label="Limpar busca">
-              <i className="fas fa-times"></i>
-            </button>
-          </div>
-          <div className={`catalog-suggestions${showSuggestions ? " open" : ""}`}>
-            {suggestions.map((v, i) => {
-              const q = searchVal.trim().toLowerCase();
-              return (
-                <div key={i} className="suggestion-item" onMouseDown={() => selectSuggestion(`${v.brand} ${v.model}`)}>
-                  <div className="suggestion-item-icon"><i className="fas fa-car"></i></div>
-                  <div className="suggestion-item-text">
-                    <strong>{highlightText(v.brand, q)} · {highlightText(v.model, q)}</strong>
-                    <span>{v.year} · {v.category.includes("novo") && !v.category.includes("seminovo") ? "0KM" : v.category.charAt(0).toUpperCase() + v.category.slice(1)}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="catalog-brand-pills fade-in-up">
-          {[
-            { brand: "todas", label: "Todas as Marcas", icon: "fa-th" },
-            ...Array.from(new Set(cars.map((c) => c.brand.toLowerCase()))).map((b) => ({
-              brand: b,
-              label: b.charAt(0).toUpperCase() + b.slice(1),
-              icon: "fa-car",
-            })),
-          ].map((item) => (
-            <button key={item.brand} className={`brand-pill${currentBrand === item.brand ? " active" : ""}`} onClick={() => filterByBrand(item.brand)}>
-              <i className={`fas ${item.icon}`}></i> {item.label}
-            </button>
-          ))}
-        </div>
-
-        <div className={`catalog-result-info${resultInfo.visible ? " visible" : ""}`}>
-          <i className="fas fa-filter"></i>
-          <span dangerouslySetInnerHTML={{ __html: resultInfo.text }}></span>
-          <button className="result-clear-btn" onClick={clearSearch}>Limpar filtro</button>
-        </div>
-
-        <div className="catalog-filters fade-in-up">
-          {[
-            { key: "todos", label: "Todos" },
-            { key: "novo", label: "0KM / Novos" },
-            { key: "seminovo", label: "Seminovos" },
-            { key: "suv", label: "SUVs" },
-            { key: "pickup", label: "Pickups" },
-          ].map((item) => (
-            <button key={item.key} className={`filter-btn${currentCategory === item.key ? " active" : ""}`} onClick={() => filterVehicles(item.key)}>
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="vehicles-grid">
-          <div className={`catalog-no-results${noResults ? " visible" : ""}`}>
-            <div className="no-results-icon"><i className="fas fa-car-side"></i></div>
-            <div className="no-results-title">Nenhum veículo encontrado</div>
-            <p className="no-results-text">Não encontramos veículos com esse nome.<br />Tente buscar por outra marca ou modelo.</p>
-            <a href={whatsappUrl("Olá! Estou buscando um veículo específico e gostaria de ajuda.")} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: "inline-flex" }}>
-              <i className="fab fa-whatsapp"></i> Perguntar pelo WhatsApp
-            </a>
-          </div>
-
-          {cars.filter((c) => !c.sold).map((c) => {
-            const b = badgeFor(c.category);
-            const yearLine =
-              c.category.includes("novo") && !c.category.includes("seminovo")
-                ? `${c.year} · 0 km · Novo`
-                : `${c.year} · ${fmtKm(c.km)} km`;
-            return (
-              <div
-                key={c.id}
-                className="vehicle-card fade-in-up"
-                data-category={c.category}
-                data-brand={c.brand.toLowerCase()}
-                data-model={c.model.toLowerCase()}
-                onClick={() => openCar(c)}
-                style={{ cursor: "pointer" }}
-              >
-                <div className="vehicle-card-image">
-                  {c.image_url ? (
-                    <img src={c.image_url} alt={`${c.brand} ${c.model} ${c.year}`} loading="lazy" />
-                  ) : (
-                    <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg,#0a0a18,#141426)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <i className={`fas ${c.category.includes("pickup") ? "fa-truck-pickup" : "fa-car"}`} style={{ fontSize: "80px", color: "rgba(255,197,1,0.2)" }}></i>
-                    </div>
-                  )}
-                  <span className={`vehicle-badge ${b.cls}`}>{b.label}</span>
-                </div>
-                <div className="vehicle-card-content">
-                  <div className="vehicle-brand">{c.brand}</div>
-                  <div className="vehicle-name">{c.model}</div>
-                  <div className="vehicle-year">{yearLine}</div>
-                  <div className="vehicle-specs">
-                    {c.fuel && <span className="vehicle-spec"><i className="fas fa-gas-pump"></i> {c.fuel}</span>}
-                    {c.transmission && <span className="vehicle-spec"><i className="fas fa-cog"></i> {c.transmission}</span>}
-                    {c.color && <span className="vehicle-spec"><i className="fas fa-palette"></i> {c.color}</span>}
-                  </div>
-                  <div className="vehicle-card-footer">
-                    <a
-                      href={whatsappUrl(`Olá! Tenho interesse no ${c.brand} ${c.model} ${c.year}.`)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="vehicle-btn"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <i className="fab fa-whatsapp"></i> Tenho Interesse
-                    </a>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="catalog-cta-wrapper fade-in-up">
-          <button
-            type="button"
-            className="btn-primary"
-            onClick={() => {
-              setSearchVal("");
-              setSuggestions([]);
-              setShowSuggestions(false);
-              setCurrentBrand("todas");
-              setCurrentCategory("todos");
-              applyFilters("", "todas", "todos");
-              document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth", block: "start" });
-            }}
-          >
-            <i className="fas fa-car-side"></i> Ver todos os veículos
-          </button>
-        </div>
+        <VehiclesCatalog cars={cars} limit={6} viewAllHref="/veiculos" />
       </section>
 
       {/* SOBRE */}
@@ -748,224 +467,7 @@ export default function JBHome() {
         </a>
       </div>
 
-      {selectedCar && (() => {
-        const c = selectedCar;
-        const gallery = carGallery(c);
-        const hasGallery = gallery.length > 0;
-        const currentImg = hasGallery ? gallery[Math.min(galleryIdx, gallery.length - 1)] : null;
-        const yearLine = c.category.includes("novo") && !c.category.includes("seminovo")
-          ? `${c.year} · 0 km · Novo`
-          : `${c.year} · ${fmtKm(c.km)} km`;
-        const specs: { label: string; value: string }[] = [];
-        if (c.transmission) specs.push({ label: "Câmbio", value: c.transmission });
-        if (c.fuel) specs.push({ label: "Combustível", value: c.fuel });
-        if (c.color) specs.push({ label: "Cor", value: c.color });
-        specs.push({ label: "Quilometragem", value: `${fmtKm(c.km)} km` });
-        return (
-          <div
-            onClick={() => setSelectedCar(null)}
-            style={{ position: "fixed", inset: 0, background: "rgba(4,4,10,0.88)", backdropFilter: "blur(10px)", zIndex: 9999, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "24px 12px", overflowY: "auto", fontFamily: "Inter, sans-serif" }}
-          >
-            <div
-              onClick={(e) => e.stopPropagation()}
-              style={{ background: "#080810", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 24, maxWidth: 480, width: "100%", color: "#fff", position: "relative", overflow: "hidden", boxShadow: "0 40px 80px -20px rgba(0,0,0,0.7)" }}
-            >
-              {/* Close */}
-              <button
-                onClick={() => setSelectedCar(null)}
-                aria-label="Fechar"
-                style={{ position: "absolute", top: 14, right: 14, width: 38, height: 38, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.55)", backdropFilter: "blur(10px)", color: "#fff", cursor: "pointer", fontSize: 18, zIndex: 3, display: "flex", alignItems: "center", justifyContent: "center" }}
-              >×</button>
-
-              {/* Gallery */}
-              <div style={{ position: "relative", background: "#101018", aspectRatio: "4 / 3", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-                {currentImg ? (
-                  <img src={currentImg} alt={`${c.brand} ${c.model}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                ) : (
-                  <i className="fas fa-car" style={{ fontSize: 90, color: "rgba(255,197,1,0.2)" }}></i>
-                )}
-                {/* Cinematic bottom gradient */}
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #080810 0%, rgba(8,8,16,0) 55%)", pointerEvents: "none" }}></div>
-                {gallery.length > 1 && (
-                  <>
-                    <button
-                      onClick={() => setGalleryIdx((i) => (i - 1 + gallery.length) % gallery.length)}
-                      aria-label="Anterior"
-                      style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", width: 40, height: 40, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.45)", backdropFilter: "blur(10px)", color: "#fff", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}
-                    >‹</button>
-                    <button
-                      onClick={() => setGalleryIdx((i) => (i + 1) % gallery.length)}
-                      aria-label="Próxima"
-                      style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", width: 40, height: 40, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.45)", backdropFilter: "blur(10px)", color: "#fff", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}
-                    >›</button>
-                    <div style={{ position: "absolute", bottom: 18, right: 18, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.85)", fontSize: 10, padding: "5px 12px", borderRadius: 999, letterSpacing: 2, textTransform: "uppercase", fontWeight: 500 }}>
-                      {String(Math.min(galleryIdx, gallery.length - 1) + 1).padStart(2, "0")} / {String(gallery.length).padStart(2, "0")}
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Thumbnails overlapping the gallery */}
-              {gallery.length > 1 && (
-                <div style={{ display: "flex", gap: 8, padding: "0 20px", marginTop: -28, position: "relative", zIndex: 2, overflowX: "auto" }}>
-                  {gallery.slice(0, 4).map((url, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setGalleryIdx(i)}
-                      style={{ flex: "0 0 auto", width: 64, height: 48, borderRadius: 8, overflow: "hidden", border: i === galleryIdx ? "2px solid #FFC501" : "1px solid rgba(255,255,255,0.1)", padding: 0, cursor: "pointer", background: "#141420", opacity: i === galleryIdx ? 1 : 0.55, transition: "opacity .2s, border-color .2s" }}
-                    >
-                      <img src={url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                    </button>
-                  ))}
-                  {gallery.length > 4 && (
-                    <div style={{ flex: "0 0 auto", width: 64, height: 48, borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)", background: "#141420", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.6)", fontSize: 11, fontWeight: 600 }}>
-                      +{gallery.length - 4}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div style={{ padding: "28px 24px 24px" }}>
-                {/* Header */}
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ color: "#FFC501", fontFamily: "Outfit, sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", marginBottom: 6 }}>
-                    {c.brand}
-                  </div>
-                  <h3 style={{ fontFamily: "Outfit, sans-serif", fontSize: 30, fontWeight: 700, lineHeight: 1.05, margin: 0, letterSpacing: -0.5 }}>
-                    {c.model}
-                  </h3>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, color: "rgba(255,255,255,0.5)", fontSize: 13 }}>
-                    <span>{c.year}</span>
-                    <span style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(255,255,255,0.25)" }}></span>
-                    <span>{yearLine.split("·").slice(1).join("·").trim() || `${fmtKm(c.km)} km`}</span>
-                  </div>
-                </div>
-
-                {/* Price */}
-                {c.price && (
-                  <div style={{ marginBottom: 28 }}>
-                    <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 10, textTransform: "uppercase", letterSpacing: 2, fontWeight: 600, marginBottom: 6 }}>
-                      Preço JB Multimarcas
-                    </div>
-                    <div style={{ fontFamily: "Outfit, sans-serif", fontSize: 34, fontWeight: 700, color: "#FFC501", letterSpacing: -0.5, lineHeight: 1 }}>
-                      R$ {Number(c.price).toLocaleString("pt-BR")}
-                    </div>
-                  </div>
-                )}
-
-                {/* Specs grid */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 28 }}>
-                  {specs.map((s, i) => (
-                    <div key={i} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 4 }}>
-                      <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>{s.label}</span>
-                      <span style={{ color: "#fff", fontSize: 14, fontWeight: 500 }}>{s.value}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Description */}
-                {c.description && (
-                  <div style={{ marginBottom: 32 }}>
-                    <h4 style={{ fontFamily: "Outfit, sans-serif", color: "#fff", fontSize: 15, fontWeight: 600, margin: "0 0 12px", display: "flex", alignItems: "center", gap: 10 }}>
-                      <span style={{ width: 22, height: 2, background: "#FFC501", display: "inline-block" }}></span>
-                      Sobre o veículo
-                    </h4>
-                    <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.65, margin: 0, whiteSpace: "pre-wrap" }}>
-                      {c.description}
-                    </p>
-                  </div>
-                )}
-
-                {/* CTAs */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  <a
-                    href={whatsappUrl(`Olá! Tenho interesse no ${c.brand} ${c.model} ${c.year}.`)}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, background: "#25D366", color: "#fff", padding: "16px 18px", borderRadius: 16, textDecoration: "none", fontFamily: "Outfit, sans-serif", fontWeight: 700, fontSize: 14, letterSpacing: 0.3, boxShadow: "0 12px 30px -8px rgba(37,211,102,0.35)" }}
-                  >
-                    <i className="fab fa-whatsapp" style={{ fontSize: 18 }}></i> Tenho interesse
-                  </a>
-                  <a
-                    href={whatsappUrl(`Olá! Gostaria de agendar uma visita para ver o ${c.brand} ${c.model} ${c.year} pessoalmente. Qual o melhor horário?`)}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, background: "linear-gradient(135deg, #d4af37 0%, #b8952e 100%)", color: "#0a0a0a", padding: "16px 18px", borderRadius: 16, textDecoration: "none", fontFamily: "Outfit, sans-serif", fontWeight: 700, fontSize: 14, letterSpacing: 0.3, boxShadow: "0 12px 30px -8px rgba(212,175,55,0.4)" }}
-                  >
-                    <i className="fas fa-calendar-check" style={{ fontSize: 16 }}></i> Agendar visita
-                  </a>
-                </div>
-
-                {/* Back link */}
-                <div style={{ marginTop: 24, display: "flex", justifyContent: "center", paddingBottom: 4 }}>
-                  <button
-                    onClick={() => setSelectedCar(null)}
-                    style={{ background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.35)", fontSize: 11, fontWeight: 500, textTransform: "uppercase", letterSpacing: 3, paddingBottom: 4, cursor: "pointer" }}
-                  >
-                    Voltar ao showroom
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {waText !== null && (
-        <div
-          onClick={() => setWaText(null)}
-          style={{ position: "fixed", inset: 0, background: "rgba(4,4,10,0.88)", backdropFilter: "blur(10px)", zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 16px", fontFamily: "Inter, sans-serif" }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{ background: "#0b0b14", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 22, maxWidth: 400, width: "100%", color: "#fff", padding: "28px 24px", position: "relative", boxShadow: "0 40px 80px -20px rgba(0,0,0,0.7)" }}
-          >
-            <button
-              onClick={() => setWaText(null)}
-              aria-label="Fechar"
-              style={{ position: "absolute", top: 12, right: 12, width: 34, height: 34, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.55)", color: "#fff", cursor: "pointer", fontSize: 16 }}
-            >×</button>
-            <div style={{ textAlign: "center", marginBottom: 20 }}>
-              <div style={{ color: "#25D366", fontSize: 34, marginBottom: 8 }}>
-                <i className="fab fa-whatsapp"></i>
-              </div>
-              <h3 style={{ fontFamily: "Outfit, sans-serif", fontSize: 22, fontWeight: 700, margin: "0 0 6px" }}>
-                Fale com a JB Multimarcas
-              </h3>
-              <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, margin: 0 }}>
-                Escolha com qual sócio você quer conversar:
-              </p>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {SOCIOS.map((s) => (
-                <a
-                  key={s.fone}
-                  href={whatsappUrlFor(s.fone, waText)}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => setTimeout(() => setWaText(null), 100)}
-                  style={{ display: "flex", alignItems: "center", gap: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "14px 16px", textDecoration: "none", color: "#fff", transition: "background .2s, border-color .2s" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(37,211,102,0.08)"; e.currentTarget.style.borderColor = "rgba(37,211,102,0.4)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}
-                >
-                  <div style={{ width: 44, height: 44, borderRadius: "50%", background: s.cor, color: "#0a0a0a", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Outfit, sans-serif", fontWeight: 800, fontSize: 18 }}>
-                    {s.inicial}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: "Outfit, sans-serif", fontWeight: 700, fontSize: 15 }}>Falar com {s.nome}</div>
-                    <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, marginTop: 2 }}>
-                      ({s.fone.slice(2, 4)}) {s.fone.slice(4, 9)}-{s.fone.slice(9)}
-                    </div>
-                  </div>
-                  <div style={{ color: "#25D366", fontSize: 22 }}>
-                    <i className="fab fa-whatsapp"></i>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      <WaChooser />
     </div>
   );
 }

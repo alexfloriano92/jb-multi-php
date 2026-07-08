@@ -8,6 +8,8 @@ export default function WaChooser() {
     const onClick = (ev: MouseEvent) => {
       const target = (ev.target as HTMLElement | null)?.closest?.('a[href*="wa.me/"]') as HTMLAnchorElement | null;
       if (!target) return;
+      // Não intercepta cliques dentro do próprio modal (links dos sócios).
+      if (target.closest("[data-wa-chooser]")) return;
       ev.preventDefault();
       let text = "Olá! Vim pelo site da JB Multimarcas e gostaria de mais informações.";
       try {

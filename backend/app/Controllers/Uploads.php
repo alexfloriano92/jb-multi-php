@@ -26,16 +26,22 @@ class Uploads extends ResourceController
             return $this->failValidationErrors('Formato não suportado ('.$mime.' / .'.$ext.').');
         }
 
-        // Diretório físico: public_html/uploads/cars/
-        // FCPATH aponta para o public/ do Laravel/CI. Na Locaweb, o
-        // public_html/index.php aponta FCPATH para o próprio public_html.
-        $dir = FCPATH . 'uploads/cars/';
+        // Na Locaweb o FCPATH aponta para public_html/api/ (bridge do CI).
+        // Precisamos gravar na raiz pública (public_html/uploads/cars/) para
+        // que a URL https://dominio/uploads/cars/xxx.jpg realmente exista.
+        $publicRoot = realpath(FCPATH . '..') ?: dirname(FCPATH);
+        $dir = rtrim($publicRoot, '/\\') . DIRECTORY_SEPARATOR . 'uploads'
+             . DIRECTORY_SEPARATOR . 'cars' . DIRECTORY_SEPARATOR;
         if (! is_dir($dir)) mkdir($dir, 0775, true);
 
         $name = $file->getRandomName();
         $file->move($dir, $name);
 
-        $url = rtrim(base_url(), '/') . '/uploads/cars/' . $name;
+        // base_url() do CI aponta para .../api/ (por causa da bridge).
+        // Removemos o sufixo /api para que a URL fique na raiz do site.
+        $base = rtrim(base_url(), '/');
+        $base = preg_replace('#/api$#', '', $base);
+        $url  = $base . '/uploads/cars/' . $name;
         return $this->respondCreated(['url' => $url]);
     }
 }

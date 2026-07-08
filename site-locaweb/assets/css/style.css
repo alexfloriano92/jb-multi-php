@@ -1753,6 +1753,14 @@ footer {
   transform: translateX(0);
 }
 
+@media (min-width: 769px) {
+  .mobile-menu,
+  .mobile-menu.open {
+    display: none !important;
+    transform: translateX(100%);
+  }
+}
+
 .mobile-menu a {
   font-family: 'Outfit', sans-serif;
   font-size: 28px;

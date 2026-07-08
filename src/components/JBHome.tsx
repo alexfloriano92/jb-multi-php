@@ -75,24 +75,6 @@ export default function JBHome() {
   }, [menuOpen]);
 
   useEffect(() => {
-    if (selectedCar) {
-      document.body.style.overflow = "hidden";
-      setGalleryIdx(0);
-    } else if (!menuOpen) {
-      document.body.style.overflow = "";
-    }
-  }, [selectedCar, menuOpen]);
-
-  function openCar(c: Car) {
-    setSelectedCar(c);
-  }
-
-  function carGallery(c: Car): string[] {
-    const list = [c.image_url, ...((c.images || []) as string[])].filter(Boolean) as string[];
-    return list.length ? list : [];
-  }
-
-  useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -107,87 +89,6 @@ export default function JBHome() {
     document.querySelectorAll(".fade-in-up").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, [cars.length]);
-
-  const applyFilters = (search = searchVal, brand = currentBrand, category = currentCategory) => {
-    const nodes = document.querySelectorAll<HTMLElement>(".vehicle-card");
-    let visibleCount = 0;
-    nodes.forEach((card) => {
-      const cardBrand = (card.dataset.brand || "").toLowerCase();
-      const cardModel = (card.dataset.model || "").toLowerCase();
-      const cats = (card.dataset.category || "").split(" ");
-      const q = search.trim().toLowerCase();
-      const matchSearch = !q || cardBrand.includes(q) || cardModel.includes(q) || (cardBrand + " " + cardModel).includes(q);
-      const matchBrand = brand === "todas" || cardBrand === brand;
-      const matchCategory = category === "todos" || cats.includes(category);
-      const show = matchSearch && matchBrand && matchCategory;
-      if (show) {
-        visibleCount++;
-        card.style.opacity = "1";
-        card.style.transform = "";
-        card.style.display = "";
-      } else {
-        card.style.opacity = "0";
-        card.style.transform = "scale(0.95)";
-        setTimeout(() => {
-          card.style.display = "none";
-        }, 300);
-      }
-    });
-    const q = search.trim().toLowerCase();
-    if (q || brand !== "todas") {
-      const label = q ? `"${q}"` : `Marca: ${brand.charAt(0).toUpperCase() + brand.slice(1)}`;
-      setResultInfo({
-        visible: true,
-        text: `<strong>${visibleCount}</strong> veículo${visibleCount !== 1 ? "s" : ""} encontrado${visibleCount !== 1 ? "s" : ""} para ${label}`,
-      });
-      setNoResults(visibleCount === 0);
-    } else {
-      setResultInfo({ visible: false, text: "" });
-      setNoResults(false);
-    }
-  };
-
-  const handleSearchInput = (val: string) => {
-    setSearchVal(val);
-    const q = val.trim().toLowerCase();
-    if (!q) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-    } else {
-      const matches = cars.filter(
-        (v) => v.brand.toLowerCase().includes(q) || v.model.toLowerCase().includes(q)
-      );
-      setSuggestions(matches);
-      setShowSuggestions(matches.length > 0);
-    }
-    applyFilters(val, currentBrand, currentCategory);
-  };
-
-  const clearSearch = () => {
-    setSearchVal("");
-    setSuggestions([]);
-    setShowSuggestions(false);
-    applyFilters("", currentBrand, currentCategory);
-  };
-
-  const selectSuggestion = (text: string) => {
-    setSearchVal(text);
-    setShowSuggestions(false);
-    applyFilters(text, currentBrand, currentCategory);
-  };
-
-  const filterByBrand = (brand: string) => {
-    setCurrentBrand(brand);
-    setSearchVal("");
-    setSuggestions([]);
-    setShowSuggestions(false);
-    applyFilters("", brand, currentCategory);
-  };
-
-  const filterVehicles = (cat: string) => {
-    setCurrentCategory(cat);
-    applyFilters(searchVal, currentBrand, cat);
-  };
 
   useEffect(() => {
     const valor = parseFloat(calcValor) || 0;
@@ -211,20 +112,14 @@ export default function JBHome() {
     if (formData.email) text += ` E-mail: ${formData.email}.`;
     if (formData.interesse) text += ` Tenho interesse em: ${formData.interesse}.`;
     if (formData.mensagem) text += ` Mensagem: ${formData.mensagem}`;
-    setWaText(text);
-  };
-
-  const highlightText = (text: string, query: string) => {
-    if (!query) return text;
-    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const parts = text.split(new RegExp(`(${escaped})`, "gi"));
-    return parts.map((part, i) =>
-      part.toLowerCase() === query.toLowerCase() ? (
-        <em key={i} style={{ color: "var(--gold)", fontStyle: "normal" }}>{part}</em>
-      ) : (
-        part
-      )
-    );
+    // Abre o mesmo modal seletor do WhatsApp via um link temporário.
+    const a = document.createElement("a");
+    a.href = `https://wa.me/5535999091119?text=${encodeURIComponent(text)}`;
+    a.target = "_blank";
+    a.rel = "noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   };
 
   return (

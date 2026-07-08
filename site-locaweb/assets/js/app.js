@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   wireContactForm();
   wireFilters();
   wireSearch();
+  wireOpenStatus();
 
   try {
     const res = await fetch(`${API}/cars`);

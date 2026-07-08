@@ -17,33 +17,21 @@ const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 let CARS = [];
 let currentBrand = "todas";
 let currentCategory = "todos";
+const PAGE = (document.body && document.body.dataset.page) || "home";
+const HOME_LIMIT = 6;
 
 // ---------- Boot ----------
 document.addEventListener("DOMContentLoaded", async () => {
-  $("#year").textContent = new Date().getFullYear();
-  $("#heroWhats").href = wa("Olá! Vim pelo site e gostaria de mais informações.");
-  $("#floatWhats").href = wa("Olá! Vim pelo site da JB Multimarcas e gostaria de mais informações.");
-  $("#noResultsWhats").href = wa("Olá! Estou buscando um veículo específico e gostaria de ajuda.");
-  const showAllBtn = document.getElementById("catalogShowAll");
-  if (showAllBtn) {
-    showAllBtn.addEventListener("click", () => {
-      currentBrand = "todas";
-      currentCategory = "todos";
-      const si = $("#searchInput"); if (si) si.value = "";
-      const sc = $("#searchClear"); if (sc) sc.style.display = "none";
-      $("#suggestions")?.classList.remove("open");
-      $$(".filter-btn").forEach((b) => b.classList.toggle("active", b.dataset.cat === "todos"));
-      renderBrandPills();
-      applyFilters();
-      document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }
+  const yr = $("#year"); if (yr) yr.textContent = new Date().getFullYear();
+  const hw = $("#heroWhats"); if (hw) hw.href = wa("Olá! Vim pelo site e gostaria de mais informações.");
+  const fw = $("#floatWhats"); if (fw) fw.href = wa("Olá! Vim pelo site da JB Multimarcas e gostaria de mais informações.");
+  const nrw = $("#noResultsWhats"); if (nrw) nrw.href = wa("Olá! Estou buscando um veículo específico e gostaria de ajuda.");
 
   wireNavbar();
-  wireContactForm();
-  wireFilters();
-  wireSearch();
-  wireOpenStatus();
+  if ($("#contactForm")) wireContactForm();
+  if ($(".filter-btn")) wireFilters();
+  if ($("#searchInput")) wireSearch();
+  if ($("#openStatus")) wireOpenStatus();
   wireWhatsChooser();
 
   try {
@@ -53,21 +41,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.warn("Falha ao carregar carros:", e);
     CARS = [];
   }
-  renderBrandPills();
+  if ($("#brandPills")) renderBrandPills();
   renderCars();
-  renderInterestOptions();
+  if ($("#c-int")) renderInterestOptions();
   observeFadeIn();
 });
 
 // ---------- Navbar ----------
 function wireNavbar() {
   const nav = $("#navbar");
+  if (!nav) return;
   const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > 60);
   window.addEventListener("scroll", onScroll);
   onScroll();
 
   const ham = $("#navHamburger");
   const menu = $("#mobileMenu");
+  if (!ham || !menu) return;
   ham.addEventListener("click", () => {
     const open = menu.classList.toggle("open");
     ham.classList.toggle("active", open);
@@ -122,10 +112,17 @@ function renderBrandPills() {
 
 function renderCars() {
   const grid = $("#vehiclesGrid");
+  if (!grid) return;
   // limpa mantendo o noResults
   $$("#vehiclesGrid .vehicle-card").forEach((el) => el.remove());
 
-  const list = CARS.filter((c) => !c.sold);
+  let list = CARS.filter((c) => !c.sold);
+  if (PAGE === "home") {
+    // Prioriza destaques; completa com os mais recentes até HOME_LIMIT
+    const featured = list.filter((c) => c.featured);
+    const others = list.filter((c) => !c.featured);
+    list = featured.concat(others).slice(0, HOME_LIMIT);
+  }
   list.forEach((c) => {
     const b = badgeFor(c.category || "");
     const yearLine = (c.category || "").includes("novo") && !(c.category || "").includes("seminovo")
@@ -169,7 +166,12 @@ function renderCars() {
     });
     grid.appendChild(el);
   });
-  applyFilters();
+  if ($("#searchInput")) applyFilters();
+  else {
+    // Sem filtros na home: só mostra o noResults se lista vazia
+    const noRes = $("#noResults");
+    if (noRes) noRes.classList.toggle("visible", list.length === 0);
+  }
 }
 
 function renderInterestOptions() {

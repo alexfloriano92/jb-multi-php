@@ -227,6 +227,10 @@ export default function JBHome() {
         <a href="#sobre" onClick={() => setMenuOpen(false)}>Sobre</a>
         <a href="#avaliacoes" onClick={() => setMenuOpen(false)}>Avaliações</a>
         <a href="#contato" onClick={() => setMenuOpen(false)}>Contato</a>
+        <Link to="/auth" onClick={() => setMenuOpen(false)} className="jb-admin-key jb-admin-key--mobile" aria-label="Painel administrativo">
+          <span className="jb-admin-key__icon"><i className="fas fa-key"></i></span>
+          <span className="jb-admin-key__label">Área Restrita</span>
+        </Link>
       </div>
 
       {/* HERO */}

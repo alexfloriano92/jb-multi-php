@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Todos os Veículos — JB Multimarcas</title>
+  <meta name="description" content="Catálogo completo de veículos 0KM e seminovos da JB Multimarcas em Cachoeira de Minas. Filtre por marca, categoria e busque por modelo." />
+  <meta property="og:title" content="Todos os Veículos — JB Multimarcas" />
+  <meta property="og:description" content="Catálogo completo com busca e filtros. Encontre seu próximo carro na JB Multimarcas." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="assets/images/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="veiculos">
+  <div class="jb-app">
+    <!-- NAVBAR -->
+    <nav id="navbar" class="scrolled">
+      <a href="index.html" class="nav-logo">
+        <img src="assets/images/logo.png" alt="JB Multimarcas" class="nav-logo-img" />
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Início</a></li>
+        <li><a href="index.html#sobre">Sobre</a></li>
+        <li><a href="index.html#avaliacoes">Avaliações</a></li>
+        <li><a href="index.html#contato" class="nav-cta">Falar Conosco</a></li>
+        <li>
+          <a href="admin.html" class="jb-admin-key" title="Área restrita" aria-label="Painel administrativo">
+            <span class="jb-admin-key__icon"><i class="fas fa-key"></i></span>
+            <span class="jb-admin-key__label">Restrito</span>
+            <span class="jb-admin-key__shine" aria-hidden="true"></span>
+          </a>
+        </li>
+      </ul>
+      <button id="navHamburger" class="nav-hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+
+    <div id="mobileMenu" class="mobile-menu">
+      <a href="index.html">Início</a>
+      <a href="index.html#sobre">Sobre</a>
+      <a href="index.html#avaliacoes">Avaliações</a>
+      <a href="index.html#contato">Contato</a>
+      <a href="admin.html" class="jb-admin-key jb-admin-key--mobile" aria-label="Painel administrativo">
+        <span class="jb-admin-key__icon"><i class="fas fa-key"></i></span>
+        <span class="jb-admin-key__label">Área Restrita</span>
+      </a>
+    </div>
+
+    <!-- CATÁLOGO COMPLETO -->
+    <section id="catalogo" style="padding-top:140px">
+      <div class="section-header fade-in-up">
+        <div class="section-tag"><i class="fas fa-car"></i> Estoque Completo</div>
+        <h2 class="section-title">Todos os <span class="gold">Veículos</span></h2>
+        <p class="section-subtitle">Use a busca e os filtros abaixo para encontrar o carro ideal.</p>
+      </div>
+
+      <div class="catalog-search-wrapper fade-in-up">
+        <div class="catalog-search-box">
+          <span class="catalog-search-icon"><i class="fas fa-search"></i></span>
+          <input id="searchInput" type="text" placeholder="Buscar por marca ou modelo... ex: Toyota, Onix, Hilux" autocomplete="off" />
+          <button id="searchClear" class="catalog-search-clear" style="display:none" title="Limpar busca" aria-label="Limpar busca">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div id="suggestions" class="catalog-suggestions"></div>
+      </div>
+
+      <div id="brandPills" class="catalog-brand-pills fade-in-up"></div>
+
+      <div id="resultInfo" class="catalog-result-info">
+        <i class="fas fa-filter"></i>
+        <span id="resultInfoText"></span>
+        <button id="resultClear" class="result-clear-btn">Limpar filtro</button>
+      </div>
+
+      <div class="catalog-filters fade-in-up">
+        <button class="filter-btn active" data-cat="todos">Todos</button>
+        <button class="filter-btn" data-cat="novo">0KM / Novos</button>
+        <button class="filter-btn" data-cat="seminovo">Seminovos</button>
+        <button class="filter-btn" data-cat="suv">SUVs</button>
+        <button class="filter-btn" data-cat="pickup">Pickups</button>
+      </div>
+
+      <div id="vehiclesGrid" class="vehicles-grid">
+        <div id="noResults" class="catalog-no-results">
+          <div class="no-results-icon"><i class="fas fa-car-side"></i></div>
+          <div class="no-results-title">Nenhum veículo encontrado</div>
+          <p class="no-results-text">Não encontramos veículos com esse nome.<br />Tente buscar por outra marca ou modelo.</p>
+          <a id="noResultsWhats" href="#" target="_blank" rel="noreferrer" class="btn-primary" style="display:inline-flex">
+            <i class="fab fa-whatsapp"></i> Perguntar pelo WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <div class="catalog-cta-wrapper fade-in-up">
+        <a href="index.html" class="btn-secondary" style="display:inline-flex">
+          <i class="fas fa-arrow-left"></i> Voltar para a página inicial
+        </a>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div style="text-align:center;color:var(--text-muted);font-size:14px;padding:24px 0">
+        © <span id="year"></span> JB Multimarcas · Todos os direitos reservados
+      </div>
+    </footer>
+
+    <div id="whatsapp-float">
+      <a id="floatWhats" href="#" target="_blank" rel="noreferrer" class="whatsapp-btn">
+        <i class="fab fa-whatsapp"></i>
+        <span class="btn-text">Falar no WhatsApp</span>
+      </a>
+    </div>
+
+    <div id="carModal"></div>
+  </div>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

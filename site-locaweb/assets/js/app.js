@@ -24,7 +24,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#heroWhats").href = wa("Olá! Vim pelo site e gostaria de mais informações.");
   $("#floatWhats").href = wa("Olá! Vim pelo site da JB Multimarcas e gostaria de mais informações.");
   $("#noResultsWhats").href = wa("Olá! Estou buscando um veículo específico e gostaria de ajuda.");
-  $("#catalogWhats").href = wa("Olá! Gostaria de ver todos os veículos disponíveis.");
+  const showAllBtn = document.getElementById("catalogShowAll");
+  if (showAllBtn) {
+    showAllBtn.addEventListener("click", () => {
+      currentBrand = "todas";
+      currentCategory = "todos";
+      const si = $("#searchInput"); if (si) si.value = "";
+      const sc = $("#searchClear"); if (sc) sc.style.display = "none";
+      $("#suggestions")?.classList.remove("open");
+      $$(".filter-btn").forEach((b) => b.classList.toggle("active", b.dataset.cat === "todos"));
+      renderBrandPills();
+      applyFilters();
+      document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 
   wireNavbar();
   wireContactForm();

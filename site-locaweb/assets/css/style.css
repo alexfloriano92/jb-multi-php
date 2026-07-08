@@ -568,16 +568,18 @@ section {
   display: flex;
   align-items: center;
   gap: 0;
-  background: var(--dark-card);
-  border: 2px solid var(--dark-border);
-  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(20, 20, 30, 0.95), rgba(12, 12, 20, 0.95));
+  border: 3px solid rgba(255, 197, 1, 0.35);
+  border-radius: 18px;
   overflow: hidden;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
 }
 
 .catalog-search-box:focus-within {
   border-color: var(--gold);
-  box-shadow: 0 0 0 4px rgba(255, 197, 1, 0.15);
+  box-shadow: 0 0 0 5px rgba(255, 197, 1, 0.18), 0 12px 36px rgba(255, 197, 1, 0.18);
+  transform: translateY(-1px);
 }
 
 .catalog-search-icon {
@@ -594,12 +596,12 @@ section {
   background: transparent !important;
   border: none;
   outline: none;
-  padding: 20px 0;
+  padding: 22px 4px;
   color: var(--text-primary) !important;
   font-family: 'Inter', sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  letter-spacing: 0.2px;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
   -webkit-appearance: none;
   appearance: none;
   box-shadow: none;
@@ -618,7 +620,8 @@ section {
 #searchInput:-webkit-autofill:focus,
 .catalog-search-box input:-webkit-autofill {
   -webkit-text-fill-color: var(--text-primary);
-  -webkit-box-shadow: 0 0 0 1000px var(--dark-card) inset;
+  -webkit-box-shadow: 0 0 0 1000px rgba(15, 15, 22, 0.98) inset;
+  caret-color: var(--gold);
   transition: background-color 5000s ease-in-out 0s;
 }
 

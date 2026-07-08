@@ -102,6 +102,13 @@ export async function uploadCarImage(file: File): Promise<string> {
 export const carsQueryOptions = queryOptions({
   queryKey: ["cars"],
   queryFn: fetchCars,
+  // Mantém os dados hidratados do SSR "frescos" por 5 minutos. Sem isso, o
+  // `defaultPreloadStaleTime: 0` do router dispara um refetch imediato no
+  // cliente; em preview / mobile o fetch cross-origin falha (CORS) e o
+  // fallback `[]` de `fetchCars` sobrescreve os carros vindos do SSR,
+  // deixando o catálogo em branco.
+  staleTime: 5 * 60 * 1000,
+  gcTime: 30 * 60 * 1000,
 });
 
 export function categoryLabel(c: string): string {

@@ -392,3 +392,66 @@ function escapeHtml(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 function escapeAttr(s) { return escapeHtml(s); }
+
+// ---------- Status Aberto/Fechado em tempo real ----------
+const SCHEDULE = {
+  0: null,              // Domingo
+  1: [7 * 60 + 30, 18 * 60],       // Segunda
+  2: [7 * 60 + 30, 17 * 60],       // Terça
+  3: [7 * 60 + 30, 17 * 60],       // Quarta
+  4: [7 * 60 + 30, 17 * 60],       // Quinta
+  5: [7 * 60 + 30, 17 * 60],       // Sexta
+  6: [8 * 60, 12 * 60],            // Sábado
+};
+const DAY_NAMES = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
+
+function fmtMin(m) {
+  const h = Math.floor(m / 60);
+  const mm = m % 60;
+  return `${String(h).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+}
+
+function nextOpening(day, min) {
+  for (let i = 0; i < 8; i++) {
+    const d = (day + i) % 7;
+    const s = SCHEDULE[d];
+    if (!s) continue;
+    if (i === 0 && min < s[0]) return { day: d, open: s[0], sameDay: true };
+    if (i > 0) return { day: d, open: s[0], sameDay: false };
+  }
+  return null;
+}
+
+function updateOpenStatus() {
+  const el = $("#openStatus");
+  if (!el) return;
+  const now = new Date();
+  const day = now.getDay();
+  const min = now.getHours() * 60 + now.getMinutes();
+  const s = SCHEDULE[day];
+  let cls, txt;
+  if (s && min >= s[0] && min < s[1]) {
+    cls = "is-open";
+    txt = `Aberto agora · fecha às ${fmtMin(s[1])}`;
+  } else {
+    cls = "is-closed";
+    const nx = nextOpening(day, min);
+    if (nx) {
+      const when = nx.sameDay ? `hoje às ${fmtMin(nx.open)}` : `${DAY_NAMES[nx.day]} às ${fmtMin(nx.open)}`;
+      txt = `Fechado agora · abre ${when}`;
+    } else {
+      txt = "Fechado";
+    }
+  }
+  el.className = `open-status ${cls}`;
+  el.textContent = txt;
+
+  $$(".horario-item").forEach((it) => {
+    it.classList.toggle("today", Number(it.dataset.day) === day);
+  });
+}
+
+function wireOpenStatus() {
+  updateOpenStatus();
+  setInterval(updateOpenStatus, 60 * 1000);
+}

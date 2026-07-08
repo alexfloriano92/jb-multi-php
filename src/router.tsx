@@ -13,8 +13,8 @@ export const getRouter = () => {
     // Ship server-fetched React Query cache to the client so useSuspenseQuery
     // reuses SSR data instead of refetching (which fails when the PHP API is
     // on a different origin than the front-end, e.g. Lovable preview → .com.br).
-    dehydrate: () => ({ queryClientState: dehydrate(queryClient) }),
-    hydrate: (dehydrated: { queryClientState: ReturnType<typeof dehydrate> }) => {
+    dehydrate: (): any => ({ queryClientState: dehydrate(queryClient) }),
+    hydrate: (dehydrated: any) => {
       hydrate(queryClient, dehydrated.queryClientState);
     },
   });

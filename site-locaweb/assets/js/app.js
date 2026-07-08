@@ -61,6 +61,13 @@ function wireNavbar() {
       document.body.style.overflow = "";
     })
   );
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 768 && menu.classList.contains("open")) {
+      menu.classList.remove("open");
+      ham.classList.remove("active");
+      document.body.style.overflow = "";
+    }
+  });
 }
 
 // ---------- Renderização de carros ----------

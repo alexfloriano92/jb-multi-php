@@ -1544,6 +1544,20 @@ select.form-control {
   background: rgba(34, 197, 94, 0.12);
   color: #22c55e;
 }
+.open-status.is-open::before {
+  background: #22c55e;
+  animation: openPulse 1.2s ease-in-out infinite;
+}
+@keyframes openPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.9), 0 0 10px #22c55e;
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0), 0 0 18px #22c55e;
+    transform: scale(1.25);
+  }
+}
 .open-status.is-closed {
   background: rgba(239, 68, 68, 0.12);
   color: #ef4444;

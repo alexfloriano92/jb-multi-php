@@ -335,7 +335,7 @@ function openWaChooser(text) {
   const socios = SOCIOS.map((s) => `
     <a href="https://wa.me/${s.fone}?text=${encodeURIComponent(text)}" target="_blank" rel="noreferrer"
        class="wa-choice"
-       style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;text-decoration:none;color:#fff;transition:background .08s ease-out,border-color .08s ease-out">
+       style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;text-decoration:none;color:#fff">
       <div style="width:44px;height:44px;border-radius:50%;background:${s.cor};color:#0a0a0a;display:flex;align-items:center;justify-content:center;font-family:Outfit,sans-serif;font-weight:800;font-size:18px">${s.inicial}</div>
       <div style="flex:1">
         <div style="font-family:Outfit,sans-serif;font-weight:700;font-size:15px">Falar com ${s.nome}</div>

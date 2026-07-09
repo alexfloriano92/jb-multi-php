@@ -435,11 +435,98 @@ function parseWhatsappVehicle(raw) {
 
   // Telefones (só para referência — jogamos na descrição se tiver)
   const desc = raw.trim();
-  if (desc) out.description = desc;
+  if (desc) out.description = corrigirPortugues(desc);
 
   return out;
 }
 
 function capitalize(s) {
   return s.toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase());
+}
+
+// -------------------------------------------------------------------
+// Correção ortográfica leve (PT-BR) — sem API externa.
+// Corrige acentuação e erros comuns segundo o Acordo Ortográfico vigente.
+// -------------------------------------------------------------------
+function corrigirPortugues(texto) {
+  if (!texto) return texto;
+
+  // Dicionário: chave = forma incorreta (minúscula), valor = forma correta.
+  // Use \b nas regex — troca preserva contexto.
+  const dic = {
+    // acentuação
+    "veiculo": "veículo", "veiculos": "veículos",
+    "hidraulica": "hidráulica", "hidraulico": "hidráulico",
+    "eletrico": "elétrico", "eletrica": "elétrica",
+    "eletricos": "elétricos", "eletricas": "elétricas",
+    "automatico": "automático", "automatica": "automática",
+    "cambio": "câmbio",
+    "camera": "câmera", "cameras": "câmeras",
+    "re": "ré",
+    "ar condicionado": "ar-condicionado",
+    "multimidia": "multimídia",
+    "pneu": "pneu", "pneus": "pneus",
+    "unico dono": "único dono", "unica dona": "única dona",
+    "revisoes": "revisões", "revisao": "revisão",
+    "porta malas": "porta-malas", "porta-malas": "porta-malas",
+    "vidro eletrico": "vidro elétrico", "vidros eletricos": "vidros elétricos",
+    "trava eletrica": "trava elétrica", "travas eletricas": "travas elétricas",
+    "direçao": "direção", "direcao": "direção",
+    "gasolina": "gasolina", "etanol": "etanol",
+    "hibrido": "híbrido", "hibrida": "híbrida",
+    "sedan": "sedã",
+    "cabine": "cabine",
+    "motor": "motor",
+    "otimo": "ótimo", "otima": "ótima",
+    "excelente": "excelente",
+    "confortavel": "confortável",
+    "economico": "econômico", "economica": "econômica",
+    "cinza chumbo": "cinza-chumbo",
+    "so": "só",
+    "esta": "está", "estao": "estão",
+    "tambem": "também",
+    "ja": "já",
+    "porem": "porém",
+    "nao": "não",
+    "voce": "você", "voces": "vocês",
+    "atraves": "através",
+    "aluminio": "alumínio",
+    "traseiro": "traseiro",
+    "kilometragem": "quilometragem", "kilometros": "quilômetros",
+    "quilometragem": "quilometragem",
+    "km rodados": "km rodados",
+    "aceito troca": "aceito troca", "aceitamos troca": "aceitamos troca",
+    "financio": "financio",
+    "laudo cautelar": "laudo cautelar",
+  };
+
+  let out = texto;
+
+  // 1) Substituições case-insensitive preservando capitalização inicial.
+  for (const [errado, certo] of Object.entries(dic)) {
+    const re = new RegExp("\\b" + errado.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b", "gi");
+    out = out.replace(re, (m) => matchCase(m, certo));
+  }
+
+  // 2) Normalizações de pontuação/espaço.
+  out = out
+    .replace(/[ \t]+/g, " ")               // espaços múltiplos
+    .replace(/\s+([,.;:!?])/g, "$1")       // espaço antes de pontuação
+    .replace(/([,.;:!?])(?=\S)/g, "$1 ")   // espaço após pontuação
+    .replace(/ *\n */g, "\n")              // limpa em torno de quebras
+    .replace(/\n{3,}/g, "\n\n");
+
+  // 3) Capitaliza início de frases.
+  out = out.replace(/(^|[.!?]\s+|\n)([a-záéíóúâêôãõç])/g,
+    (_, p, c) => p + c.toUpperCase());
+
+  return out.trim();
+}
+
+function matchCase(original, replacement) {
+  if (original === original.toUpperCase()) return replacement.toUpperCase();
+  if (original[0] === original[0].toUpperCase()) {
+    return replacement.charAt(0).toUpperCase() + replacement.slice(1);
+  }
+  return replacement;
 }

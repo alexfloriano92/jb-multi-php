@@ -574,6 +574,10 @@ function parseWhatsappVehicle(raw) {
   const desc = raw.trim();
   if (desc) out.description = corrigirPortugues(desc);
 
+  // Detecta categoria a partir de marca+modelo+descrição
+  const catGuess = detectCategoria(`${out.brand || ""} ${out.model || ""} ${desc}`);
+  if (catGuess) out.category = catGuess;
+
   return out;
 }
 

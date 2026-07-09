@@ -367,6 +367,7 @@ async function saveCar(e) {
 
 function resetForm() {
   form = defaults();
+  resetCatTouched();
   editingId = null;
   document.getElementById("formTitle").textContent = "Novo veículo";
   document.getElementById("saveBtn").textContent = "Adicionar veículo";

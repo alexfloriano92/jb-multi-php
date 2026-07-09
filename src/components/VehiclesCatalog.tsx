@@ -197,7 +197,7 @@ export default function VehiclesCatalog({ cars, showFilters = false, limit, view
               onClick={() => setSelectedCar(c)} style={{ cursor: "pointer" }}>
               <div className="vehicle-card-image">
                 {c.image_url ? (
-                  <img src={c.image_url} alt={`${c.brand} ${c.model} ${c.year}`} loading="lazy" />
+                  <img src={c.image_url} alt={`${c.brand} ${c.model} ${c.year}`} loading="lazy" style={{ objectFit: "contain", background: "#0a0a16" }} />
                 ) : (
                   <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg,#0a0a18,#141426)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <i className={`fas ${c.category.includes("pickup") ? "fa-truck-pickup" : "fa-car"}`} style={{ fontSize: "80px", color: "rgba(255,197,1,0.2)" }}></i>

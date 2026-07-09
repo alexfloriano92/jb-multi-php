@@ -451,72 +451,95 @@ function capitalize(s) {
 function corrigirPortugues(texto) {
   if (!texto) return texto;
 
-  // Dicionário: chave = forma incorreta (minúscula), valor = forma correta.
-  // Use \b nas regex — troca preserva contexto.
+  // Dicionário PT-BR (Acordo Ortográfico vigente).
+  // Chave = forma sem acento / com erro comum; Valor = forma correta.
   const dic = {
-    // acentuação
-    "veiculo": "veículo", "veiculos": "veículos",
-    "hidraulica": "hidráulica", "hidraulico": "hidráulico",
-    "eletrico": "elétrico", "eletrica": "elétrica",
-    "eletricos": "elétricos", "eletricas": "elétricas",
-    "automatico": "automático", "automatica": "automática",
-    "cambio": "câmbio",
-    "camera": "câmera", "cameras": "câmeras",
-    "re": "ré",
-    "ar condicionado": "ar-condicionado",
-    "multimidia": "multimídia",
-    "pneu": "pneu", "pneus": "pneus",
-    "unico dono": "único dono", "unica dona": "única dona",
-    "revisoes": "revisões", "revisao": "revisão",
-    "porta malas": "porta-malas", "porta-malas": "porta-malas",
-    "vidro eletrico": "vidro elétrico", "vidros eletricos": "vidros elétricos",
-    "trava eletrica": "trava elétrica", "travas eletricas": "travas elétricas",
-    "direçao": "direção", "direcao": "direção",
-    "gasolina": "gasolina", "etanol": "etanol",
-    "hibrido": "híbrido", "hibrida": "híbrida",
-    "sedan": "sedã",
-    "cabine": "cabine",
-    "motor": "motor",
-    "otimo": "ótimo", "otima": "ótima",
-    "excelente": "excelente",
-    "confortavel": "confortável",
-    "economico": "econômico", "economica": "econômica",
-    "cinza chumbo": "cinza-chumbo",
-    "so": "só",
-    "esta": "está", "estao": "estão",
-    "tambem": "também",
-    "ja": "já",
-    "porem": "porém",
-    "nao": "não",
-    "voce": "você", "voces": "vocês",
-    "atraves": "através",
-    "aluminio": "alumínio",
-    "traseiro": "traseiro",
-    "kilometragem": "quilometragem", "kilometros": "quilômetros",
-    "quilometragem": "quilometragem",
-    "km rodados": "km rodados",
-    "aceito troca": "aceito troca", "aceitamos troca": "aceitamos troca",
-    "financio": "financio",
-    "laudo cautelar": "laudo cautelar",
+    "veiculo":"veículo","veiculos":"veículos",
+    "hidraulica":"hidráulica","hidraulico":"hidráulico",
+    "eletrico":"elétrico","eletrica":"elétrica","eletricos":"elétricos","eletricas":"elétricas",
+    "automatico":"automático","automatica":"automática","automaticos":"automáticos","automaticas":"automáticas",
+    "cambio":"câmbio","cambios":"câmbios",
+    "camera":"câmera","cameras":"câmeras",
+    "camera de re":"câmera de ré","câmera de re":"câmera de ré",
+    "ar condicionado":"ar-condicionado",
+    "multimidia":"multimídia","midia":"mídia",
+    "porta malas":"porta-malas","porta-malas":"porta-malas",
+    "para choque":"para-choque","para-choque":"para-choque",
+    "para brisa":"para-brisa","para-brisa":"para-brisa",
+    "vidro eletrico":"vidro elétrico","vidros eletricos":"vidros elétricos",
+    "trava eletrica":"trava elétrica","travas eletricas":"travas elétricas",
+    "direçao":"direção","direcao":"direção",
+    "direçao hidraulica":"direção hidráulica","direcao hidraulica":"direção hidráulica",
+    "direçao eletrica":"direção elétrica","direcao eletrica":"direção elétrica",
+    "transmissao":"transmissão","suspensao":"suspensão",
+    "injeçao":"injeção","injecao":"injeção","ignicao":"ignição",
+    "retrovisor eletrico":"retrovisor elétrico","retrovisores eletricos":"retrovisores elétricos",
+    "farois":"faróis","farol de milha":"farol de milha",
+    "liga leve":"liga leve","aluminio":"alumínio",
+    "pneus novos":"pneus novos",
+    "laudo cautelar":"laudo cautelar","laudo cautelar aprovado":"laudo cautelar aprovado",
+    "unico dono":"único dono","unica dona":"única dona","segundo dono":"segundo dono",
+    "revisao":"revisão","revisoes":"revisões","revisao em dia":"revisão em dia",
+    "manutencao":"manutenção","manutencoes":"manutenções",
+    "documentacao":"documentação","documentacao ok":"documentação ok",
+    "ipva":"IPVA","ipva pago":"IPVA pago","ipva quitado":"IPVA quitado",
+    "licenciamento":"licenciamento","licenciado":"licenciado",
+    "transferencia":"transferência","procedencia":"procedência",
+    "gasolina":"gasolina","etanol":"etanol","alcool":"álcool",
+    "hibrido":"híbrido","hibrida":"híbrida","flex":"Flex","diesel":"Diesel",
+    "sedan":"sedã","suv":"SUV","utilitario":"utilitário","utilitarios":"utilitários",
+    "cupe":"cupê","conversivel":"conversível",
+    "cinza chumbo":"cinza-chumbo","azul marinho":"azul-marinho","verde escuro":"verde-escuro",
+    "bordo":"bordô",
+    "kilometragem":"quilometragem","quilometragem":"quilometragem",
+    "kilometros":"quilômetros","quilometros":"quilômetros",
+    "otimo":"ótimo","otima":"ótima","otimos":"ótimos","otimas":"ótimas",
+    "confortavel":"confortável","confortaveis":"confortáveis",
+    "economico":"econômico","economica":"econômica","economicos":"econômicos","economicas":"econômicas",
+    "impecavel":"impecável","impecaveis":"impecáveis",
+    "nao":"não","tambem":"também","ja":"já","so":"só","porem":"porém",
+    "voce":"você","voces":"vocês","atraves":"através",
+    "esta":"está","estao":"estão","sao":"são","serao":"serão",
+    "aceito troca":"aceito troca","aceitamos troca":"aceitamos troca",
+    "financio":"financio","financiamento":"financiamento","financiado":"financiado",
+    "parcelamos":"parcelamos","parcelado":"parcelado",
+    "credito aprovado":"crédito aprovado","avaliacao":"avaliação",
+    "duvida":"dúvida","duvidas":"dúvidas",
+    "informacoes":"informações","informaçoes":"informações",
+    "a venda":"à venda","à venda":"à venda",
   };
 
   let out = texto;
 
-  // 1) Substituições case-insensitive preservando capitalização inicial.
-  for (const [errado, certo] of Object.entries(dic)) {
-    const re = new RegExp("\\b" + errado.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b", "gi");
-    out = out.replace(re, (m) => matchCase(m, certo));
+  // 1) Substituições — expressões longas primeiro (evita quebrar multi-palavra).
+  const entries = Object.entries(dic).sort((a, b) => b[0].length - a[0].length);
+  for (const [errado, certo] of entries) {
+    const esc = errado.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    // \b não funciona com acentos; usamos borda de caracteres alfanuméricos+acentuados.
+    const re = new RegExp("(^|[^A-Za-zÀ-ÿ0-9])(" + esc + ")(?![A-Za-zÀ-ÿ0-9])", "gi");
+    out = out.replace(re, (_m, pre, w) => pre + matchCase(w, certo));
   }
 
-  // 2) Normalizações de pontuação/espaço.
+  // 2) Regras heurísticas de sufixo — corrigem palavras não listadas.
+  //    "-cao"/"-çao" → "-ção"  |  "-coes"/"-çoes" → "-ções"
+  out = out.replace(/([a-zà-ÿ])(ç|c)ao(?![a-zà-ÿ])/gi, (_m, p, c) => {
+    const cc = c === "C" ? "Ç" : c === "c" ? "ç" : c;
+    return p + cc + "ão";
+  });
+  out = out.replace(/([a-zà-ÿ])(ç|c)oes(?![a-zà-ÿ])/gi, (_m, p, c) => {
+    const cc = c === "C" ? "Ç" : c === "c" ? "ç" : c;
+    return p + cc + "ões";
+  });
+
+  // 3) Normaliza pontuação/espaços.
   out = out
-    .replace(/[ \t]+/g, " ")               // espaços múltiplos
-    .replace(/\s+([,.;:!?])/g, "$1")       // espaço antes de pontuação
-    .replace(/([,.;:!?])(?=\S)/g, "$1 ")   // espaço após pontuação
-    .replace(/ *\n */g, "\n")              // limpa em torno de quebras
+    .replace(/[ \t]+/g, " ")
+    .replace(/\s+([,.;:!?])/g, "$1")
+    .replace(/([,.;:!?])(?=\S)/g, "$1 ")
+    .replace(/ *\n */g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 
-  // 3) Capitaliza início de frases.
+  // 4) Capitaliza início de frases.
   out = out.replace(/(^|[.!?]\s+|\n)([a-záéíóúâêôãõç])/g,
     (_, p, c) => p + c.toUpperCase());
 

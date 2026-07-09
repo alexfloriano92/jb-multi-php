@@ -315,11 +315,37 @@ function renderGallery() {
   if (!form.images.length) { grid.style.display = "none"; grid.innerHTML = ""; return; }
   grid.style.display = "grid";
   grid.innerHTML = form.images.map((url, i) => `
-    <div class="gal-thumb"><img src="${url}" alt="" /><button type="button" data-i="${i}" title="Remover">×</button></div>
+    <div class="gal-thumb" draggable="true" data-i="${i}" title="Arraste para reordenar" style="cursor:grab;position:relative">
+      <img src="${url}" alt="" draggable="false" style="pointer-events:none" />
+      <span style="position:absolute;left:6px;top:6px;background:rgba(0,0,0,.65);color:#fff;font-size:11px;padding:2px 6px;border-radius:10px;font-weight:700">${i+1}</span>
+      <button type="button" data-i="${i}" title="Remover">×</button>
+    </div>
   `).join("");
   grid.querySelectorAll("button[data-i]").forEach((b) =>
     b.addEventListener("click", () => { form.images.splice(Number(b.dataset.i), 1); renderGallery(); })
   );
+  // Drag & drop reorder
+  let dragFrom = null;
+  grid.querySelectorAll(".gal-thumb").forEach((el) => {
+    el.addEventListener("dragstart", (e) => {
+      dragFrom = Number(el.dataset.i);
+      el.style.opacity = ".4";
+      try { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(dragFrom)); } catch(_) {}
+    });
+    el.addEventListener("dragend", () => { el.style.opacity = ""; grid.querySelectorAll(".gal-thumb").forEach(t => t.style.outline = ""); });
+    el.addEventListener("dragover", (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; el.style.outline = "2px dashed var(--gold)"; });
+    el.addEventListener("dragleave", () => { el.style.outline = ""; });
+    el.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const to = Number(el.dataset.i);
+      const from = dragFrom != null ? dragFrom : Number(e.dataTransfer.getData("text/plain"));
+      if (Number.isNaN(from) || Number.isNaN(to) || from === to) return;
+      const [moved] = form.images.splice(from, 1);
+      form.images.splice(to, 0, moved);
+      dragFrom = null;
+      renderGallery();
+    });
+  });
 }
 
 async function uploadCover(file) {

@@ -154,6 +154,11 @@ export default function VehiclesCatalog({ cars, showFilters = false, limit, view
               { key: "seminovo", label: "Seminovos" },
               { key: "suv", label: "SUVs" },
               { key: "pickup", label: "Pickups" },
+              { key: "moto", label: "Motos" },
+              { key: "eletrico", label: "Elétricos" },
+              { key: "hibrido", label: "Híbridos" },
+              { key: "hatch", label: "Hatch" },
+              { key: "sedan", label: "Sedan" },
             ].map((item) => (
               <button key={item.key} className={`filter-btn${currentCategory === item.key ? " active" : ""}`} onClick={() => setCurrentCategory(item.key)}>
                 {item.label}

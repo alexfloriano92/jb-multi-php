@@ -535,7 +535,7 @@ function corrigirPortugues(texto) {
   out = out
     .replace(/[ \t]+/g, " ")
     .replace(/\s+([,.;:!?])/g, "$1")
-    .replace(/([,.;:!?])(?=\S)/g, "$1 ")
+    .replace(/([;:!?])(?=\S)/g, "$1 ").replace(/([,.])(?=[^\s\d])/g, "$1 ")
     .replace(/ *\n */g, "\n")
     .replace(/\n{3,}/g, "\n\n");
 

@@ -376,15 +376,22 @@ function parseWhatsappVehicle(raw) {
   if (m) out.year = Number(m[1]);
 
   // KM
-  m = low.match(/([\d\.\,]+)\s*(?:mil\s*)?km\b/) || low.match(/km[:\s]*([\d\.\,]+)/);
+  // Aceita: "84.000 km", "84 mil km", "159mil rodados", "159 mil rodados", "km: 84000", "rodados: 84000"
+  m = low.match(/([\d\.\,]+)\s*mil\s*(?:km|rodad|rod\b)/)
+   || low.match(/([\d\.\,]+)\s*km\b/)
+   || low.match(/(?:km|rodad(?:os|as)?|rodag[eé]m)[:\s]*([\d\.\,]+)/)
+   || low.match(/([\d\.\,]+)\s*rodad/);
   if (m) {
     let n = Number(m[1].replace(/\./g,"").replace(",","."));
-    if (/mil\s*km/.test(low) && n < 1000) n *= 1000;
+    // Se veio "xxx mil ..." ou "xxxmil ...", multiplica por 1000
+    const raw1 = m[0];
+    if (/mil/.test(raw1) && n < 1000) n *= 1000;
     if (!isNaN(n)) out.km = Math.round(n);
   }
 
-  // Preço R$
-  m = t.match(/R\$\s*([\d\.\,]+)/i) || low.match(/pre[çc]o[:\s]*(?:r\$\s*)?([\d\.\,]+)/);
+  // Preço — aceita "R$ 37.500,00", "Valor: 37.500,00", "Preço 37500", "por 37.500"
+  m = t.match(/R\$\s*([\d\.\,]+)/i)
+   || low.match(/(?:pre[çc]o|valor|pe[çc]o|por)[:\s]*(?:r\$\s*)?([\d\.\,]+)/);
   if (m) {
     const n = Number(m[1].replace(/\./g,"").replace(",","."));
     if (!isNaN(n)) out.price = n;
@@ -394,13 +401,18 @@ function parseWhatsappVehicle(raw) {
   if (/\bautom[aá]tic|\bcvt\b|\bautomatizad/i.test(t)) out.transmission = /\bcvt\b/i.test(t) ? "CVT" : (/automatizad/i.test(t) ? "Automatizado" : "Automático");
   else if (/\bmanual\b/i.test(t)) out.transmission = "Manual";
 
-  // Combustível
-  if (/\bh[íi]brid/i.test(t))       out.fuel = "Híbrido";
-  else if (/\bel[eé]tric/i.test(t)) out.fuel = "Elétrico";
-  else if (/\bdiesel\b/i.test(t))   out.fuel = "Diesel";
-  else if (/\betanol\b/i.test(t))   out.fuel = "Etanol";
-  else if (/\bgasolina\b/i.test(t)) out.fuel = "Gasolina";
-  else if (/\bflex\b/i.test(t))     out.fuel = "Flex";
+  // Combustível — Flex tem prioridade sobre "elétrico" para evitar
+  // falso-positivo em "vidros elétricos" / "trava elétrica".
+  // Também ignoramos "elétrico(s/a)" quando aparece ao lado de vidro/trava/retrovisor/direção.
+  const hasFlex     = /\bflex\b/i.test(t);
+  const eletricoCtx = /(vidros?|travas?|retrovisor(?:es)?|dire[çc][aã]o|espelhos?)\s+el[eé]tric/i.test(t)
+                   || /el[eé]tric(?:os|as)\b/i.test(t); // plural = quase sempre acessório
+  if (hasFlex)                                     out.fuel = "Flex";
+  else if (/\bh[íi]brid/i.test(t))                 out.fuel = "Híbrido";
+  else if (/\bel[eé]tric/i.test(t) && !eletricoCtx) out.fuel = "Elétrico";
+  else if (/\bdiesel\b/i.test(t))                  out.fuel = "Diesel";
+  else if (/\betanol\b/i.test(t))                  out.fuel = "Etanol";
+  else if (/\bgasolina\b/i.test(t))                out.fuel = "Gasolina";
 
   // Cor
   const cores = ["preto","preta","branco","branca","prata","cinza","vermelho","vermelha","azul","verde","amarelo","amarela","dourado","dourada","bege","marrom","bordô","bordo","grafite"];

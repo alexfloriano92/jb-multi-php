@@ -107,6 +107,33 @@
         <p class="section-subtitle">Uma seleção dos nossos melhores veículos. Veja o catálogo completo com filtros e busca.</p>
       </div>
 
+      <div class="catalog-search-wrapper fade-in-up">
+        <div class="catalog-search-box">
+          <span class="catalog-search-icon"><i class="fas fa-search"></i></span>
+          <input id="searchInput" type="text" placeholder="Buscar por marca ou modelo... ex: Toyota, Onix, Hilux" autocomplete="off" />
+          <button id="searchClear" class="catalog-search-clear" style="display:none" title="Limpar busca" aria-label="Limpar busca">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div id="suggestions" class="catalog-suggestions"></div>
+      </div>
+
+      <div id="brandPills" class="catalog-brand-pills fade-in-up"></div>
+
+      <div id="resultInfo" class="catalog-result-info">
+        <i class="fas fa-filter"></i>
+        <span id="resultInfoText"></span>
+        <button id="resultClear" class="result-clear-btn">Limpar filtro</button>
+      </div>
+
+      <div class="catalog-filters fade-in-up">
+        <button class="filter-btn active" data-cat="todos">Todos</button>
+        <button class="filter-btn" data-cat="novo">0KM / Novos</button>
+        <button class="filter-btn" data-cat="seminovo">Seminovos</button>
+        <button class="filter-btn" data-cat="suv">SUVs</button>
+        <button class="filter-btn" data-cat="pickup">Pickups</button>
+      </div>
+
       <div id="vehiclesGrid" class="vehicles-grid">
         <div id="noResults" class="catalog-no-results">
           <div class="no-results-icon"><i class="fas fa-car-side"></i></div>

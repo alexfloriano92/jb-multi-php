@@ -350,10 +350,14 @@ function renderGallery() {
 
 async function uploadCover(file) {
   try {
+    // Abre modal de recorte antes de enviar (aspect igual à exibição da capa)
+    const blob = await cropImage(file, 3 / 2).catch(() => null);
+    if (!blob) return; // cancelou
+    const cropped = new File([blob], (file.name || "capa").replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg" });
     const up = document.getElementById("uploader");
     up.classList.remove("has-img");
-    up.innerHTML = `<div style="color:var(--gold);font-size:14px"><i class="fas fa-spinner fa-spin" style="margin-right:8px"></i>Enviando ${escapeHtml(file.name)}...</div>`;
-    const url = await uploadFile(file);
+    up.innerHTML = `<div style="color:var(--gold);font-size:14px"><i class="fas fa-spinner fa-spin" style="margin-right:8px"></i>Enviando ${escapeHtml(cropped.name)}...</div>`;
+    const url = await uploadFile(cropped);
     form.image_url = url;
     renderUploader();
   } catch (e) {
@@ -361,6 +365,110 @@ async function uploadCover(file) {
     showFormErr("Upload falhou: " + (e.message || e));
     renderUploader();
   }
+}
+
+// ---------- Recorte de imagem (capa) ----------
+// Retorna um Blob JPEG recortado no aspect informado (largura/altura).
+function cropImage(file, aspect) {
+  return new Promise((resolve, reject) => {
+    const src = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => openCropModal(img, src, aspect, resolve, reject);
+    img.onerror = () => { URL.revokeObjectURL(src); reject(new Error("Imagem inválida")); };
+    img.src = src;
+  });
+}
+
+function openCropModal(img, srcUrl, aspect, resolve, reject) {
+  const cleanup = () => { document.body.removeChild(ov); URL.revokeObjectURL(srcUrl); };
+  const ov = document.createElement("div");
+  ov.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px";
+  ov.innerHTML = `
+    <div style="color:#fff;font-size:14px;margin-bottom:8px;font-weight:600">Recorte a capa (arraste para mover, use o canto para redimensionar)</div>
+    <div id="cropStage" style="position:relative;max-width:90vw;max-height:70vh;background:#000;overflow:hidden;user-select:none;touch-action:none"></div>
+    <div style="margin-top:14px;display:flex;gap:10px">
+      <button type="button" id="cropCancel" style="padding:10px 18px;border:0;border-radius:8px;background:#333;color:#fff;font-weight:600;cursor:pointer">Cancelar</button>
+      <button type="button" id="cropOk" style="padding:10px 18px;border:0;border-radius:8px;background:var(--gold,#ffc501);color:#000;font-weight:700;cursor:pointer">Recortar e enviar</button>
+    </div>`;
+  document.body.appendChild(ov);
+
+  const stage = ov.querySelector("#cropStage");
+  // Escala para caber
+  const maxW = Math.min(window.innerWidth * 0.9, 900);
+  const maxH = window.innerHeight * 0.7;
+  const scale = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight, 1);
+  const dispW = Math.round(img.naturalWidth * scale);
+  const dispH = Math.round(img.naturalHeight * scale);
+  stage.style.width = dispW + "px";
+  stage.style.height = dispH + "px";
+  stage.innerHTML = `<img src="${srcUrl}" style="width:100%;height:100%;display:block;pointer-events:none" draggable="false"/>`;
+
+  // Caixa de recorte inicial (aspect fixo)
+  let bw = Math.min(dispW, dispH * aspect) * 0.9;
+  let bh = bw / aspect;
+  if (bh > dispH) { bh = dispH * 0.9; bw = bh * aspect; }
+  let bx = (dispW - bw) / 2, by = (dispH - bh) / 2;
+
+  const box = document.createElement("div");
+  box.style.cssText = "position:absolute;border:2px solid #ffc501;box-shadow:0 0 0 9999px rgba(0,0,0,.55);cursor:move";
+  const handle = document.createElement("div");
+  handle.style.cssText = "position:absolute;right:-8px;bottom:-8px;width:18px;height:18px;background:#ffc501;border:2px solid #000;border-radius:4px;cursor:nwse-resize";
+  box.appendChild(handle);
+  stage.appendChild(box);
+
+  const apply = () => {
+    bx = Math.max(0, Math.min(bx, dispW - bw));
+    by = Math.max(0, Math.min(by, dispH - bh));
+    box.style.left = bx + "px"; box.style.top = by + "px";
+    box.style.width = bw + "px"; box.style.height = bh + "px";
+  };
+  apply();
+
+  let mode = null, sx = 0, sy = 0, sbx = 0, sby = 0, sbw = 0, sbh = 0;
+  const onDown = (e, m) => {
+    e.preventDefault(); mode = m;
+    const p = e.touches ? e.touches[0] : e;
+    sx = p.clientX; sy = p.clientY; sbx = bx; sby = by; sbw = bw; sbh = bh;
+    document.addEventListener("mousemove", onMove); document.addEventListener("mouseup", onUp);
+    document.addEventListener("touchmove", onMove, { passive: false }); document.addEventListener("touchend", onUp);
+  };
+  const onMove = (e) => {
+    if (!mode) return; e.preventDefault();
+    const p = e.touches ? e.touches[0] : e;
+    const dx = p.clientX - sx, dy = p.clientY - sy;
+    if (mode === "move") { bx = sbx + dx; by = sby + dy; }
+    else {
+      let nw = Math.max(40, sbw + dx);
+      let nh = nw / aspect;
+      if (sbx + nw > dispW) { nw = dispW - sbx; nh = nw / aspect; }
+      if (sby + nh > dispH) { nh = dispH - sby; nw = nh * aspect; }
+      bw = nw; bh = nh;
+    }
+    apply();
+  };
+  const onUp = () => {
+    mode = null;
+    document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp);
+    document.removeEventListener("touchmove", onMove); document.removeEventListener("touchend", onUp);
+  };
+  box.addEventListener("mousedown", (e) => { if (e.target === handle) return; onDown(e, "move"); });
+  box.addEventListener("touchstart", (e) => { if (e.target === handle) return; onDown(e, "move"); }, { passive: false });
+  handle.addEventListener("mousedown", (e) => onDown(e, "resize"));
+  handle.addEventListener("touchstart", (e) => onDown(e, "resize"), { passive: false });
+
+  ov.querySelector("#cropCancel").addEventListener("click", () => { cleanup(); reject(new Error("cancelado")); });
+  ov.querySelector("#cropOk").addEventListener("click", () => {
+    const sc = 1 / scale;
+    const sxN = Math.round(bx * sc), syN = Math.round(by * sc);
+    const swN = Math.round(bw * sc), shN = Math.round(bh * sc);
+    // Saída máx 1200px de largura
+    const outW = Math.min(1200, swN);
+    const outH = Math.round(outW / aspect);
+    const cv = document.createElement("canvas");
+    cv.width = outW; cv.height = outH;
+    cv.getContext("2d").drawImage(img, sxN, syN, swN, shN, 0, 0, outW, outH);
+    cv.toBlob((b) => { cleanup(); b ? resolve(b) : reject(new Error("Falha ao gerar imagem")); }, "image/jpeg", 0.9);
+  });
 }
 
 async function uploadFile(file) {

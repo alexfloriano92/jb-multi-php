@@ -421,21 +421,16 @@ function parseWhatsappVehicle(raw) {
     if (re.test(t)) { out.color = c.charAt(0).toUpperCase()+c.slice(1); break; }
   }
 
-  // Marca / Modelo — 1ª palavra em MAIÚSCULA de uma lista comum
-  const marcas = ["FIAT","VOLKSWAGEN","VW","CHEVROLET","GM","FORD","TOYOTA","HYUNDAI","HONDA","RENAULT","NISSAN","JEEP","PEUGEOT","CITROEN","CITROËN","MITSUBISHI","KIA","BMW","MERCEDES","AUDI","VOLVO","LAND","RAM","DODGE","SUZUKI","SMART","CAOA","CHERY","BYD","GWM","JAC"];
-  const upper = raw.toUpperCase();
-  let brand = null, brandIdx = -1;
-  for (const b of marcas) {
-    const idx = upper.indexOf(b);
-    if (idx >= 0 && (brandIdx < 0 || idx < brandIdx)) { brand = b; brandIdx = idx; }
-  }
-  if (brand) {
-    out.brand = brand === "VW" ? "Volkswagen" : (brand === "GM" ? "Chevrolet" : capitalize(brand));
-    // Modelo = próximas 1-3 palavras após a marca, cortando em vírgula/traço/quebra
-    const after = raw.slice(brandIdx + brand.length).replace(/^[\s\-:]+/, "");
-    const stop = after.search(/[,\n\r\.\/]|\bano\b|\d{4}/i);
-    const chunk = (stop > 0 ? after.slice(0, stop) : after).trim().split(/\s+/).slice(0,4).join(" ");
-    if (chunk) out.model = chunk;
+  // Marca / Modelo — 1ª linha não vazia: 1ª palavra = marca, restante = modelo.
+  // Ex.: "Chevrolet Cobalt 1.4 LT" → brand="Chevrolet", model="Cobalt 1.4 LT"
+  const firstLine = raw.split(/\r?\n/).map(s => s.trim()).find(Boolean) || "";
+  const clean = firstLine.replace(/^[\-\*\•\s]+/, "").trim();
+  const parts = clean.split(/\s+/);
+  if (parts.length >= 1 && /^[A-Za-zÀ-ÿ]{2,}$/.test(parts[0])) {
+    const aliases = { VW: "Volkswagen", GM: "Chevrolet" };
+    const rawBrand = parts[0].toUpperCase();
+    out.brand = aliases[rawBrand] || capitalize(parts[0]);
+    if (parts.length > 1) out.model = parts.slice(1).join(" ");
   }
 
   // Telefones (só para referência — jogamos na descrição se tiver)

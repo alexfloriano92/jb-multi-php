@@ -118,6 +118,143 @@ function wireForm() {
   document.getElementById("cancelBtn").addEventListener("click", resetForm);
   syncFormInputs();
   wireWhatsappImport();
+  wireAutoCategoria();
+}
+
+// -------------------------------------------------------------------
+// Sugestão automática de Categoria com base em marca+modelo+descrição.
+// Não sobrescreve se o usuário já escolheu manualmente.
+// -------------------------------------------------------------------
+function wireAutoCategoria() {
+  const fCat   = document.getElementById("fCat");
+  const fBrand = document.getElementById("fBrand");
+  const fModel = document.getElementById("fModel");
+  const fDesc  = document.getElementById("fDesc");
+  if (!fCat) return;
+
+  // Marca como "tocado pelo usuário" quando ele mudar manualmente.
+  fCat.addEventListener("change", () => { fCat.dataset.userTouched = "1"; });
+
+  const runSuggest = () => {
+    if (fCat.dataset.userTouched === "1") return;
+    const sugestao = detectCategoria(
+      `${fBrand.value} ${fModel.value} ${fDesc.value}`
+    );
+    if (sugestao) fCat.value = sugestao;
+  };
+  ["input","change","blur"].forEach(ev => {
+    fBrand.addEventListener(ev, runSuggest);
+    fModel.addEventListener(ev, runSuggest);
+    fDesc .addEventListener(ev, runSuggest);
+  });
+}
+
+// Reseta o "toque manual" quando o formulário é limpo / carregado.
+function resetCatTouched() {
+  const fCat = document.getElementById("fCat");
+  if (fCat) delete fCat.dataset.userTouched;
+}
+
+// Dicionário Marca+Modelo → categoria (words minúsculas, sem acento).
+// A ordem NÃO importa; usamos matching por palavra-chave.
+const CAT_KEYWORDS = {
+  moto: [
+    "moto","motocicleta","cb ","cbr","xre","bros","fazer","factor","titan","fan",
+    "biz","pop","cg ","xj6","mt-03","mt-07","mt-09","z400","z900","ninja","hornet",
+    "yamaha","harley","triumph","kawasaki","ducati","bmw motorrad","dafra","shineray"
+  ],
+  caminhao: [
+    "caminhao","caminhão","truck","bitruck","cavalo mecanico","volvo fh","volvo fm",
+    "scania r","scania s","mercedes atego","mercedes axor","mercedes actros",
+    "constellation","cargo 815","cargo 816","cargo 1723","daf xf","iveco tector",
+    "iveco stralis","vw delivery"
+  ],
+  pickup: [
+    "toro","hilux","ranger","s10","s-10","frontier","amarok","l200","triton","dakota",
+    "gladiator","maverick","f-250","f250","strada","saveiro","montana","oroch","rampage",
+    "courier","hoggar","ram 1500","ram 2500","ram 3500","ram rampage","picape","pickup"
+  ],
+  suv: [
+    "compass","renegade","commander","tracker","trailblazer","equinox","captur","kicks",
+    "duster","territory","bronco","ecosport","edge","rav4","corolla cross","sw4","kuga",
+    "creta","tucson","santa fe","hr-v","hrv","wr-v","wrv","cr-v","crv","pilot","pajero",
+    "outlander","asx","eclipse cross","tiggo","haval","song","song plus","song pro",
+    "xc40","xc60","xc90","q3","q5","q7","q8","x1","x3","x5","x6","glc","gle","gla",
+    "range rover","evoque","discovery","defender","tiguan","taos","t-cross","tcross",
+    "nivus","polo track","fastback","pulse","2008","3008","5008","c4 cactus","aircross"
+  ],
+  hatch: [
+    "onix","onix hatch","gol","up","polo","fox","fit","city hatch","yaris hatch",
+    "argo","mobi","palio","uno","ka ","ka hatch","fiesta","march","sandero","stepway",
+    "clio","206","207","208","c3","picanto","i30","hb20","hb20s","hb20 hatch","celta",
+    "corsa hatch","fusca","brasilia","gol g"
+  ],
+  sedan: [
+    "corolla","civic","city sedan","yaris sedan","hb20s","voyage","siena","grand siena",
+    "cronos","logan","versa","sentra","altima","accord","jetta","virtus","polo sedan",
+    "cerato","elantra","sonata","mazda 3","mazda 6","cruze","cobalt","prisma","fluence",
+    "focus sedan","fusion","c4 pallas","c-class","classe c","classe e","classe s",
+    "serie 3","serie 5","a3 sedan","a4","a6","a8"
+  ],
+  minivan: [
+    "spin","livina","picasso","xsara picasso","touran","sharan","zafira","meriva",
+    "carnival","sedona","idea","doblo","kangoo","partner","berlingo","caddy",
+    "grand c4"
+  ],
+  utilitario: [
+    "fiorino","kombi","express","doblo cargo","kangoo express","partner furgao",
+    "berlingo furgao","master","ducato","daily","sprinter","jumper","boxer","hr ",
+    "trafic","transit","expert","jumpy","scudo"
+  ],
+  cupe: [
+    "camaro","mustang","challenger","supra","gt-r","gtr","370z","350z","rx-8","rx8",
+    "veloster","tt ","cerato koup","brz","gt86","gr86","tiburon"
+  ],
+  conversivel: [
+    "conversivel","conversível","cabriolet","cabrio","spider","roadster","boxster",
+    "z4","slk","sl "
+  ],
+  perua: [
+    "perua","station wagon","fielder","parati","quantum","astra sw","palio weekend",
+    "a4 avant","a6 avant","touring"
+  ],
+  eletrico: [
+    "leaf","kona eletrico","e-208","e208","zoe","bolt ev","mustang mach-e","mach-e",
+    "id.4","id4","id.3","id3","taycan","model 3","model s","model x","model y",
+    "byd dolphin","dolphin","byd yuan","yuan plus","seal","han ev","song plus ev",
+    "eqa","eqb","eqc","eqe","eqs","i3","i4","i7","ix","ix3","etron","e-tron"
+  ],
+  hibrido: [
+    "hibrido","híbrido","hybrid","prius","corolla hybrid","corolla cross hybrid",
+    "rav4 hybrid","niro hybrid","ioniq hybrid","c-hr hybrid","song plus dm-i",
+    "haval h6 hev","commander hybrid","compass hybrid"
+  ],
+};
+
+function _normalizaTexto(s) {
+  return " " + (s || "")
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim() + " ";
+}
+
+function detectCategoria(texto) {
+  const t = _normalizaTexto(texto);
+  if (!t.trim()) return null;
+
+  // Precedência: elétrico/híbrido/moto/caminhão vencem antes de body-style.
+  const ordem = ["eletrico","hibrido","moto","caminhao","pickup","suv","minivan","utilitario","cupe","conversivel","perua","hatch","sedan"];
+  for (const cat of ordem) {
+    for (const kw of CAT_KEYWORDS[cat]) {
+      const k = " " + kw.toLowerCase().replace(/\s+/g," ") + " ";
+      if (t.includes(k)) return cat;
+      // também tenta como palavra "colada" no fim (ex: "onix" cercado por vírgula/newline)
+      const re = new RegExp("(^|\\W)" + kw.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,"\\$&") + "(\\W|$)","i");
+      if (re.test(t)) return cat;
+    }
+  }
+  return null;
 }
 
 function syncFormInputs() {
@@ -230,6 +367,7 @@ async function saveCar(e) {
 
 function resetForm() {
   form = defaults();
+  resetCatTouched();
   editingId = null;
   document.getElementById("formTitle").textContent = "Novo veículo";
   document.getElementById("saveBtn").textContent = "Adicionar veículo";
@@ -278,6 +416,9 @@ async function reloadCars() {
         document.getElementById("saveBtn").textContent = "Salvar alterações";
         document.getElementById("cancelBtn").style.display = "inline-block";
         syncFormInputs();
+        // Ao editar um carro já salvo, respeita a categoria existente.
+        const fCatEl = document.getElementById("fCat");
+        if (fCatEl) fCatEl.dataset.userTouched = "1";
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else if (act === "del") {
         if (!confirm("Excluir este veículo?")) return;
@@ -436,6 +577,10 @@ function parseWhatsappVehicle(raw) {
   // Telefones (só para referência — jogamos na descrição se tiver)
   const desc = raw.trim();
   if (desc) out.description = corrigirPortugues(desc);
+
+  // Detecta categoria a partir de marca+modelo+descrição
+  const catGuess = detectCategoria(`${out.brand || ""} ${out.model || ""} ${desc}`);
+  if (catGuess) out.category = catGuess;
 
   return out;
 }

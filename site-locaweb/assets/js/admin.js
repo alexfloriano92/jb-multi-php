@@ -416,6 +416,9 @@ async function reloadCars() {
         document.getElementById("saveBtn").textContent = "Salvar alterações";
         document.getElementById("cancelBtn").style.display = "inline-block";
         syncFormInputs();
+        // Ao editar um carro já salvo, respeita a categoria existente.
+        const fCatEl = document.getElementById("fCat");
+        if (fCatEl) fCatEl.dataset.userTouched = "1";
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else if (act === "del") {
         if (!confirm("Excluir este veículo?")) return;

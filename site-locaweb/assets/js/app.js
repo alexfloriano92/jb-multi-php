@@ -117,10 +117,11 @@ function renderCars() {
   $$("#vehiclesGrid .vehicle-card").forEach((el) => el.remove());
 
   let list = CARS.filter((c) => !c.sold);
-  // Prioriza destaques (para a home) e completa com os demais
-  const featured = list.filter((c) => c.featured);
-  const others = list.filter((c) => !c.featured);
-  list = featured.concat(others);
+  if (PAGE === "home") {
+    const featured = list.filter((c) => c.featured);
+    const others = list.filter((c) => !c.featured);
+    list = featured.concat(others).slice(0, HOME_LIMIT);
+  }
   list.forEach((c) => {
     const b = badgeFor(c.category || "");
     const yearLine = (c.category || "").includes("novo") && !(c.category || "").includes("seminovo")
@@ -219,21 +220,6 @@ function applyFilters() {
 
   const info = $("#resultInfo");
   const noRes = $("#noResults");
-  const filtering = q || currentBrand !== "todas" || currentCategory !== "todos";
-
-  // Na home, sem filtro ativo, limita a HOME_LIMIT cards visíveis
-  if (PAGE === "home" && !filtering) {
-    let shown = 0;
-    visible = 0;
-    cards.forEach((card) => {
-      if (card.style.display !== "none" && shown < HOME_LIMIT) {
-        shown++; visible++;
-      } else {
-        card.style.display = "none";
-      }
-    });
-  }
-
   if (q || currentBrand !== "todas") {
     const label = q ? `"${q}"` : `Marca: ${currentBrand.charAt(0).toUpperCase() + currentBrand.slice(1)}`;
     $("#resultInfoText").innerHTML = `<strong>${visible}</strong> veículo${visible !== 1 ? "s" : ""} encontrado${visible !== 1 ? "s" : ""} para ${label}`;

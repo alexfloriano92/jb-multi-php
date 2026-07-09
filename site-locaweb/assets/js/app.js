@@ -421,7 +421,7 @@ function openCarModal(c) {
     const g = modal.querySelector(".mx-gallery");
     const img = gallery[idx];
     g.innerHTML = `
-      ${img ? `<img src="${escapeAttr(img)}" alt="${escapeAttr(c.brand + " " + c.model)}" style="width:100%;height:100%;object-fit:cover" />` : `<i class="fas fa-car" style="font-size:90px;color:rgba(255,197,1,.2)"></i>`}
+      ${img ? `<img src="${escapeAttr(img)}" alt="${escapeAttr(c.brand + " " + c.model)}" style="width:100%;height:100%;object-fit:contain;background:#0a0a16" />` : `<i class="fas fa-car" style="font-size:90px;color:rgba(255,197,1,.2)"></i>`}
       <div style="position:absolute;inset:0;background:linear-gradient(to top,#080810 0%,rgba(8,8,16,0) 55%);pointer-events:none"></div>
       ${gallery.length > 1 ? `
         <button class="mx-prev" aria-label="Anterior" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.45);backdrop-filter:blur(10px);color:#fff;cursor:pointer;font-size:18px">‹</button>

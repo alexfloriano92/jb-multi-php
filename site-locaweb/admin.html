@@ -112,6 +112,10 @@
       <form id="carForm" class="form-card">
         <h2 id="formTitle">Novo veículo</h2>
 
+        <button type="button" id="waImportBtn" class="btn-s" style="width:100%;background:#25d366;color:#fff;padding:10px;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700">
+          <i class="fab fa-whatsapp" style="font-size:16px"></i> Importar do WhatsApp
+        </button>
+
         <label class="lb" style="margin-top:12px">Foto do veículo (capa)</label>
         <div id="uploader" class="uploader">
           <i class="fas fa-cloud-upload-alt" style="font-size:32px;color:var(--gold);margin-bottom:8px"></i>
@@ -156,6 +160,32 @@
           <button type="button" id="cancelBtn" class="btn-s btn-dark" style="display:none">Cancelar</button>
         </div>
       </form>
+
+      <!-- MODAL WHATSAPP -->
+      <div id="waModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;align-items:center;justify-content:center;padding:16px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:640px;width:100%;max-height:92vh;overflow:auto;padding:24px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <h3 style="font-family:'Outfit',sans-serif;font-size:18px"><i class="fab fa-whatsapp" style="color:#25d366"></i> Importar do WhatsApp</h3>
+            <button type="button" id="waClose" class="btn-s btn-dark" style="padding:6px 10px">Fechar</button>
+          </div>
+          <p style="color:var(--muted);font-size:13px;margin-bottom:12px">Cole a mensagem que o cliente enviou (ex.: <em>"SMART FORTWO TURBO 1.0 Automático, Ano 2015, 52.000 km, Prata, R$ 45.000"</em>). Os campos serão preenchidos automaticamente.</p>
+          <textarea id="waText" class="ip" rows="8" placeholder="Cole aqui a mensagem do WhatsApp..." style="font-family:inherit;resize:vertical"></textarea>
+
+          <label class="lb" style="margin-top:14px">Fotos do veículo (arraste ou clique)</label>
+          <div id="waDrop" style="border:2px dashed var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;background:var(--surface);color:var(--muted);font-size:13px">
+            <i class="fas fa-images" style="font-size:24px;color:var(--gold);display:block;margin-bottom:6px"></i>
+            Arraste as fotos aqui ou clique para selecionar
+          </div>
+          <input type="file" id="waFiles" accept="image/*" multiple style="display:none" />
+          <div id="waPreview" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px"></div>
+
+          <div id="waErr" class="err-box" style="display:none;margin-top:12px"></div>
+          <div style="display:flex;gap:8px;margin-top:16px">
+            <button type="button" id="waApply" class="btn-s btn-gold" style="flex:1;padding:12px">Preencher formulário</button>
+          </div>
+          <p style="color:#6b7280;font-size:11px;margin-top:10px">Após preencher, revise os dados e clique em "Adicionar veículo". Nenhum dado é enviado para serviços externos — tudo processado no seu navegador.</p>
+        </div>
+      </div>
 
       <!-- LISTA -->
       <div>

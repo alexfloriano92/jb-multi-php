@@ -117,6 +117,7 @@ function wireForm() {
   document.getElementById("carForm").addEventListener("submit", saveCar);
   document.getElementById("cancelBtn").addEventListener("click", resetForm);
   syncFormInputs();
+  wireWhatsappImport();
 }
 
 function syncFormInputs() {
@@ -288,4 +289,150 @@ async function reloadCars() {
 
 function escapeHtml(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+// =====================================================================
+// Importador de WhatsApp — 100% no navegador (grátis, sem API externa)
+// =====================================================================
+function wireWhatsappImport() {
+  const btn    = document.getElementById("waImportBtn");
+  const modal  = document.getElementById("waModal");
+  const close  = document.getElementById("waClose");
+  const drop   = document.getElementById("waDrop");
+  const files  = document.getElementById("waFiles");
+  const prev   = document.getElementById("waPreview");
+  const apply  = document.getElementById("waApply");
+  const errBox = document.getElementById("waErr");
+  let pending = []; // File[]
+
+  const open = () => { modal.style.display = "flex"; };
+  const hide = () => { modal.style.display = "none"; document.getElementById("waText").value=""; pending=[]; prev.innerHTML=""; errBox.style.display="none"; };
+
+  btn.addEventListener("click", open);
+  close.addEventListener("click", hide);
+  modal.addEventListener("click", (e) => { if (e.target === modal) hide(); });
+
+  drop.addEventListener("click", () => files.click());
+  ["dragenter","dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.style.borderColor = "var(--gold)"; }));
+  ["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.style.borderColor = "var(--border)"; }));
+  drop.addEventListener("drop", e => addFiles(e.dataTransfer.files));
+  files.addEventListener("change", () => { addFiles(files.files); files.value = ""; });
+
+  function addFiles(list) {
+    for (const f of Array.from(list || [])) {
+      if (!f.type.startsWith("image/")) continue;
+      pending.push(f);
+      const url = URL.createObjectURL(f);
+      const div = document.createElement("div");
+      div.style.cssText = "position:relative;aspect-ratio:1/1;border-radius:8px;overflow:hidden;background:var(--surface)";
+      div.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover" />`;
+      prev.appendChild(div);
+    }
+  }
+
+  apply.addEventListener("click", async () => {
+    errBox.style.display = "none";
+    const text = document.getElementById("waText").value.trim();
+    if (!text && !pending.length) { errBox.textContent = "Cole a mensagem ou adicione fotos."; errBox.style.display="block"; return; }
+
+    // 1) parse do texto
+    if (text) {
+      const p = parseWhatsappVehicle(text);
+      Object.assign(form, p);
+      syncFormInputs();
+    }
+
+    // 2) upload das fotos (a 1ª vira capa se não houver)
+    if (pending.length) {
+      apply.disabled = true; apply.textContent = "Enviando fotos...";
+      try {
+        for (let i = 0; i < pending.length; i++) {
+          const url = await uploadFile(pending[i]);
+          if (!form.image_url && i === 0) form.image_url = url;
+          else form.images.push(url);
+        }
+        renderUploader(); renderGallery();
+      } catch (e) {
+        errBox.textContent = "Erro ao enviar foto: " + (e.message || e);
+        errBox.style.display = "block";
+        apply.disabled = false; apply.textContent = "Preencher formulário";
+        return;
+      }
+      apply.disabled = false; apply.textContent = "Preencher formulário";
+    }
+
+    hide();
+  });
+}
+
+// Parser puro-JS. Reconhece formatos livres típicos de WhatsApp em PT-BR.
+function parseWhatsappVehicle(raw) {
+  const out = {};
+  const t = " " + raw.replace(/\s+/g, " ").trim() + " ";
+  const low = t.toLowerCase();
+
+  // Ano (1980-2099) — prioriza "ano 2015" ou "2015/2016"
+  let m = low.match(/ano[:\s]*((?:19|20)\d{2})/) || low.match(/\b((?:19|20)\d{2})\s*\/\s*(?:19|20)\d{2}\b/) || low.match(/\b((?:19|20)\d{2})\b/);
+  if (m) out.year = Number(m[1]);
+
+  // KM
+  m = low.match(/([\d\.\,]+)\s*(?:mil\s*)?km\b/) || low.match(/km[:\s]*([\d\.\,]+)/);
+  if (m) {
+    let n = Number(m[1].replace(/\./g,"").replace(",","."));
+    if (/mil\s*km/.test(low) && n < 1000) n *= 1000;
+    if (!isNaN(n)) out.km = Math.round(n);
+  }
+
+  // Preço R$
+  m = t.match(/R\$\s*([\d\.\,]+)/i) || low.match(/pre[çc]o[:\s]*(?:r\$\s*)?([\d\.\,]+)/);
+  if (m) {
+    const n = Number(m[1].replace(/\./g,"").replace(",","."));
+    if (!isNaN(n)) out.price = n;
+  }
+
+  // Câmbio
+  if (/\bautom[aá]tic|\bcvt\b|\bautomatizad/i.test(t)) out.transmission = /\bcvt\b/i.test(t) ? "CVT" : (/automatizad/i.test(t) ? "Automatizado" : "Automático");
+  else if (/\bmanual\b/i.test(t)) out.transmission = "Manual";
+
+  // Combustível
+  if (/\bh[íi]brid/i.test(t))       out.fuel = "Híbrido";
+  else if (/\bel[eé]tric/i.test(t)) out.fuel = "Elétrico";
+  else if (/\bdiesel\b/i.test(t))   out.fuel = "Diesel";
+  else if (/\betanol\b/i.test(t))   out.fuel = "Etanol";
+  else if (/\bgasolina\b/i.test(t)) out.fuel = "Gasolina";
+  else if (/\bflex\b/i.test(t))     out.fuel = "Flex";
+
+  // Cor
+  const cores = ["preto","preta","branco","branca","prata","cinza","vermelho","vermelha","azul","verde","amarelo","amarela","dourado","dourada","bege","marrom","bordô","bordo","grafite"];
+  for (const c of cores) {
+    const re = new RegExp("\\b"+c+"\\b","i");
+    if (re.test(t)) { out.color = c.charAt(0).toUpperCase()+c.slice(1); break; }
+  }
+
+  // Marca / Modelo — 1ª palavra em MAIÚSCULA de uma lista comum
+  const marcas = ["FIAT","VOLKSWAGEN","VW","CHEVROLET","GM","FORD","TOYOTA","HYUNDAI","HONDA","RENAULT","NISSAN","JEEP","PEUGEOT","CITROEN","CITROËN","MITSUBISHI","KIA","BMW","MERCEDES","AUDI","VOLVO","LAND","RAM","DODGE","SUZUKI","SMART","CAOA","CHERY","BYD","GWM","JAC"];
+  const upper = raw.toUpperCase();
+  let brand = null, brandIdx = -1;
+  for (const b of marcas) {
+    const idx = upper.indexOf(b);
+    if (idx >= 0 && (brandIdx < 0 || idx < brandIdx)) { brand = b; brandIdx = idx; }
+  }
+  if (brand) {
+    out.brand = brand === "VW" ? "Volkswagen" : (brand === "GM" ? "Chevrolet" : capitalize(brand));
+    // Modelo = próximas 1-3 palavras após a marca, cortando em vírgula/traço/quebra
+    const after = raw.slice(brandIdx + brand.length).replace(/^[\s\-:]+/, "");
+    const stop = after.search(/[,\n\r\.\/]|\bano\b|\d{4}/i);
+    const chunk = (stop > 0 ? after.slice(0, stop) : after).trim().split(/\s+/).slice(0,4).join(" ");
+    if (chunk) out.model = chunk;
+  }
+
+  // Telefones (só para referência — jogamos na descrição se tiver)
+  const desc = raw.trim();
+  if (desc) out.description = desc;
+
+  return out;
+}
+
+function capitalize(s) {
+  return s.toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase());
 }

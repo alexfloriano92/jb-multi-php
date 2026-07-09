@@ -492,6 +492,15 @@ function wireWhatsappImport() {
           if (!form.image_url && i === 0) form.image_url = url;
           else form.images.push(url);
         }
+        // 3) detecta a cor dominante analisando a 1ª foto e sobrescreve o campo Cor.
+        try {
+          const corDetectada = await detectColorFromImage(pending[0]);
+          if (corDetectada) {
+            form.color = corDetectada;
+            const inp = document.getElementById("fColor");
+            if (inp) inp.value = corDetectada;
+          }
+        } catch (_) { /* silencioso — mantém a cor vinda do texto */ }
         renderUploader(); renderGallery();
       } catch (e) {
         errBox.textContent = "Erro ao enviar foto: " + (e.message || e);
@@ -587,6 +596,89 @@ function parseWhatsappVehicle(raw) {
 
 function capitalize(s) {
   return s.toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase());
+}
+
+// -------------------------------------------------------------------
+// Detecção de cor do veículo a partir da foto.
+// Desenha a imagem em canvas 120x120, amostra a região central (onde
+// tipicamente está a lataria), calcula a média ponderada de RGB e
+// mapeia para a cor nomeada mais próxima da paleta automotiva.
+// -------------------------------------------------------------------
+async function detectColorFromImage(file) {
+  if (!file || !file.type || !file.type.startsWith("image/")) return null;
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i);
+      i.onerror = rej;
+      i.src = url;
+    });
+    const W = 120, H = 120;
+    const cvs = document.createElement("canvas");
+    cvs.width = W; cvs.height = H;
+    const ctx = cvs.getContext("2d", { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0, W, H);
+    const data = ctx.getImageData(0, 0, W, H).data;
+
+    // Amostra apenas a faixa central horizontal (25%–75% em X, 35%–70% em Y)
+    // — evita céu no topo, chão no rodapé e bordas com fundo.
+    const x0 = Math.floor(W * 0.25), x1 = Math.floor(W * 0.75);
+    const y0 = Math.floor(H * 0.35), y1 = Math.floor(H * 0.70);
+    let r = 0, g = 0, b = 0, n = 0;
+    for (let y = y0; y < y1; y++) {
+      for (let x = x0; x < x1; x++) {
+        const i = (y * W + x) * 4;
+        const R = data[i], G = data[i+1], B = data[i+2];
+        // Descarta pixels quase pretos (sombra/pneu) e quase brancos (reflexo)
+        const max = Math.max(R,G,B), min = Math.min(R,G,B);
+        if (max < 20) continue;
+        if (min > 240) continue;
+        r += R; g += G; b += B; n++;
+      }
+    }
+    if (!n) return null;
+    r = Math.round(r / n); g = Math.round(g / n); b = Math.round(b / n);
+
+    return matchNamedColor(r, g, b);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+// Paleta de cores automotivas comuns (nome, R, G, B).
+const CAR_PALETTE = [
+  ["Preto",     20,  20,  22],
+  ["Grafite",   55,  58,  62],
+  ["Cinza",    120, 122, 125],
+  ["Prata",    185, 188, 192],
+  ["Branco",   235, 236, 238],
+  ["Vermelho", 175,  30,  30],
+  ["Bordô",    110,  22,  32],
+  ["Vinho",     95,  25,  40],
+  ["Laranja",  220, 110,  30],
+  ["Amarelo",  225, 200,  40],
+  ["Dourado",  180, 150,  70],
+  ["Bege",     205, 185, 150],
+  ["Marrom",   100,  60,  35],
+  ["Verde",     35, 110,  55],
+  ["Verde escuro", 25, 60, 40],
+  ["Azul",      35,  70, 170],
+  ["Azul escuro", 20, 35,  85],
+  ["Azul claro", 120, 170, 210],
+  ["Roxo",      95,  40, 130],
+  ["Rosa",     220, 130, 160],
+];
+
+function matchNamedColor(r, g, b) {
+  // Distância ponderada (olho humano é mais sensível ao verde).
+  let best = null, bestD = Infinity;
+  for (const [name, R, G, B] of CAR_PALETTE) {
+    const dr = r - R, dg = g - G, db = b - B;
+    const d = 0.30*dr*dr + 0.59*dg*dg + 0.11*db*db;
+    if (d < bestD) { bestD = d; best = name; }
+  }
+  return best;
 }
 
 // -------------------------------------------------------------------

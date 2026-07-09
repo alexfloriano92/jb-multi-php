@@ -215,7 +215,7 @@ export default function JBHome() {
           <p className="section-subtitle">Veículos selecionados com procedência garantida. 0KM e seminovos esperando por você.</p>
         </div>
 
-        <VehiclesCatalog cars={cars} showFilters limit={6} viewAllHref="/veiculos" />
+        <VehiclesCatalog cars={cars} limit={6} viewAllHref="/veiculos" />
       </section>
 
       {/* SOBRE */}
